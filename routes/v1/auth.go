@@ -1,0 +1,263 @@
+package v1
+
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"io"
+	"lemonaid-backend/customutils"
+	"lemonaid-backend/db"
+	"os"
+	"path/filepath"
+	"regexp"
+	"time"
+)
+
+type LoginBody struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func Login(c *fiber.Ctx) error {
+	var body LoginBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Data is incorrect"})
+	}
+
+	if body.Email == "" || body.Password == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Missing required fields"})
+	}
+
+	var user db.User
+	result := db.DB.Select("email", "password", "salt").Where("email = ?", body.Email).Find(&user)
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status":  fiber.StatusNotFound,
+			"message": "Email has not found",
+		})
+	}
+
+	salt := user.Salt
+	hasher := sha256.New()
+	hasher.Write([]byte(body.Password + salt))
+
+	hashedPassword := hex.EncodeToString(hasher.Sum(nil))
+
+	if hashedPassword != user.Password {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Password is incorrect",
+		})
+	}
+
+	_uuid := uuid.New()
+
+	// add session
+	sess := new(db.Session)
+	db.DB.Where("email = ?", body.Email).FirstOrInit(sess)
+
+	sess.Uuid = _uuid.String()
+	sess.Email = body.Email
+	sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
+
+	db.DB.Save(sess)
+
+	return c.JSON(fiber.Map{
+		"status":  200,
+		"session": _uuid.String(),
+	})
+}
+
+func Register(c *fiber.Ctx) error {
+	// http.Request
+	form, err := c.MultipartForm()
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "It's incorrect request. multipart form must be provided")
+	}
+	defer form.RemoveAll()
+
+	firstName := form.Value["first_name"] // required
+	lastName := form.Value["last_name"]   // required
+	email := form.Value["email"]          // required
+	password := form.Value["password"]    // required
+
+	phoneNumber := form.Value["phone_number"] // required
+	birthday := form.Value["birthday"]        // required
+	gender := form.Value["gender"]
+
+	nationality := form.Value["nationality"]
+	visacode := form.Value["visa_code"]
+	occupation := form.Value["occupation"]
+	videoMessanger := form.Value["video_messanger"]
+	videoMessangerId := form.Value["video_messanger_id"]
+
+	if firstName == nil || firstName[0] == "" || lastName == nil || lastName[0] == "" || email == nil || email[0] == "" || password == nil || password[0] == "" || phoneNumber == nil || phoneNumber[0] == "" || birthday == nil || birthday[0] == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Missing required fields"})
+	}
+
+	var checkUser db.User
+	result := db.DB.Select("email", "phone_number").Where("email = ? or phone_number = ?", email[0], phoneNumber[0]).Find(&checkUser)
+
+	if result.RowsAffected > 0 {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusOK,
+			"message": "Already exists email or phone number",
+		})
+	}
+
+	if !emailValidation(email[0]) {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Email must be email form",
+		})
+	}
+
+	var imagePath *string
+	profile := form.File["profile_image"]
+	if profile != nil {
+		h := profile[0]
+
+		path := "./contents/" + hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename)
+		imagePath = &path
+
+		go func() {
+			if h.Size > (1024*1024)*5 {
+				return
+			}
+
+			file, _ := h.Open()
+			defer file.Close()
+
+			os.MkdirAll("./public/contents", 0777)
+
+			dst, _ := os.Create("./public/contents/" + hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename))
+			defer dst.Close()
+
+			if _, err := io.Copy(dst, file); err != nil {
+				fmt.Println("Error occurs when writing file.")
+			}
+		}()
+	}
+
+	var resumeBlob *[]byte
+	resume := form.File["resume"]
+	if resume != nil {
+		h := resume[0]
+		file, err := h.Open()
+		defer file.Close()
+
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Cannot open resume file"})
+		}
+
+		bytes := make([]byte, h.Size)
+		file.Read(bytes)
+		resumeBlob = &bytes
+	}
+
+	user := new(db.User)
+	user.FirstName = firstName[0]
+	user.LastName = lastName[0]
+	user.Email = email[0]
+
+	user.Salt = string(rune(customutils.RandI(10000, 50000)))
+
+	hasher := sha256.New()
+	hasher.Write([]byte(password[0] + user.Salt))
+	user.Password = hex.EncodeToString(hasher.Sum(nil))
+
+	user.PhoneNumber = phoneNumber[0]
+	user.Image = imagePath
+	user.Resume = resumeBlob
+
+	value, err := time.Parse("2006-01-02", birthday[0])
+	if err != nil {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Incorrect form of date",
+		})
+	}
+	user.Birthday = value
+
+	// ...Optional values
+	if gender == nil {
+		user.Gender = nil
+	} else {
+		user.Gender = &gender[0]
+	}
+
+	if nationality == nil {
+		user.Nationality = nil
+	} else {
+		user.Nationality = &nationality[0]
+	}
+
+	if visacode == nil {
+		user.VisaCode = nil
+	} else {
+		user.VisaCode = &visacode[0]
+	}
+
+	if occupation == nil {
+		user.Occupation = nil
+	} else {
+		user.Occupation = &occupation[0]
+	}
+
+	if videoMessanger == nil {
+		user.VideoMessanger = nil
+	} else {
+		user.VideoMessanger = &videoMessanger[0]
+	}
+
+	if videoMessangerId == nil {
+		user.VideoMessangerID = nil
+	} else {
+		user.VideoMessangerID = &videoMessangerId[0]
+	}
+
+	go db.DB.Create(&user)
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"status":  fiber.StatusCreated,
+		"message": "Successfully account created",
+	})
+}
+
+func Logout(c *fiber.Ctx) error {
+	token := c.Get(fiber.HeaderAuthorization, "")
+
+	if token == "" {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Invalid Token",
+		})
+	}
+
+	sess := new(db.Session)
+	db.DB.Where("uuid = ?", token).FirstOrInit(sess)
+	if sess == nil {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Invalid Token",
+		})
+	}
+
+	db.DB.Unscoped().Delete(sess)
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully logout",
+	})
+}
+
+func emailValidation(email string) bool {
+	const emailPattern = `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
+
+	re := regexp.MustCompile(emailPattern)
+
+	return re.MatchString(email)
+}
