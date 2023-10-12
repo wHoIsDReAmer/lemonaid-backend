@@ -91,8 +91,8 @@ func Register(c *fiber.Ctx) error {
 	nationality := form.Value["nationality"]
 	visacode := form.Value["visa_code"]
 	occupation := form.Value["occupation"]
-	videoMessanger := form.Value["video_messanger"]
-	videoMessangerId := form.Value["video_messanger_id"]
+	videoMessenger := form.Value["video_messenger"]
+	videoMessengerId := form.Value["video_messenger_id"]
 
 	if firstName == nil || firstName[0] == "" || lastName == nil || lastName[0] == "" || email == nil || email[0] == "" || password == nil || password[0] == "" || phoneNumber == nil || phoneNumber[0] == "" || birthday == nil || birthday[0] == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Missing required fields"})
@@ -207,16 +207,16 @@ func Register(c *fiber.Ctx) error {
 		user.Occupation = &occupation[0]
 	}
 
-	if videoMessanger == nil {
-		user.VideoMessanger = nil
+	if videoMessenger == nil {
+		user.VideoMessenger = nil
 	} else {
-		user.VideoMessanger = &videoMessanger[0]
+		user.VideoMessenger = &videoMessenger[0]
 	}
 
-	if videoMessangerId == nil {
-		user.VideoMessangerID = nil
+	if videoMessengerId == nil {
+		user.VideoMessengerID = nil
 	} else {
-		user.VideoMessangerID = &videoMessangerId[0]
+		user.VideoMessengerID = &videoMessengerId[0]
 	}
 
 	go db.DB.Create(&user)
