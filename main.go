@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"lemonaid-backend/db"
 	"lemonaid-backend/dotenv"
 	v1 "lemonaid-backend/routes/v1"
@@ -18,6 +19,10 @@ func main() {
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
+
+	if os.Getenv("DEV") == "true" {
+		app.Use(cors.New())
+	}
 
 	v1.Controller(app)
 
