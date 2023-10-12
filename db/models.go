@@ -31,8 +31,8 @@ type User struct {
 	Manners int `gorm:"default:0" json:"manners"`
 	Amateur int `gorm:"default:0" json:"amateur"`
 
-	VideoMessanger   *string `gorm:"size:255" json:"video_messanger"`
-	VideoMessangerID *string `gorm:"size:255" json:"video_messanger_id"`
+	VideoMessenger   *string `gorm:"size:255" json:"video_messenger"`
+	VideoMessengerID *string `gorm:"size:255" json:"video_messenger_id"`
 	Resume           *[]byte `gorm:"type:blob" json:"resume"`
 	Image            *string `gorm:"size:255" json:"image_path"`
 	Plan             int     `gorm:"default:0" json:"plan"`
