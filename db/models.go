@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// PLAN
 const (
 	STANDARD   = 1
 	PREMIUM    = 2
@@ -12,7 +13,12 @@ const (
 	SPECIALIST = 4
 )
 
-const ()
+// USER TYPE
+const (
+	ACADEMY = 1
+	TEACHER = 2
+	ADMIN   = 3
+)
 
 type User struct {
 	gorm.Model  `json:"-"`
@@ -37,7 +43,7 @@ type User struct {
 	Image            *string `gorm:"size:255" json:"image_path"`
 	Plan             int     `gorm:"default:0" json:"plan"`
 
-	Admin int `gorm:"default:0" json:"is_admin"`
+	UserType int `gorm:"default:0" json:"user_type"`
 }
 
 type Tour struct {

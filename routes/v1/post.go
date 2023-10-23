@@ -18,14 +18,11 @@ func GetJobPosts(c *fiber.Ctx) error {
 
 func WriteJobPost(c *fiber.Ctx) error {
 	email := c.Locals("email").(string)
-	var user db.User
-	if rst := db.DB.Select("admin").Where("email = ?", email).Find(&user); rst.RowsAffected == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": fiber.StatusBadRequest,
-		})
-	}
 
-	if user.Admin == 0 {
+	var user db.User
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
+
+	if user.UserType != 3 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",
@@ -63,9 +60,9 @@ func RemoveJobPost(c *fiber.Ctx) error {
 	email := c.Locals("email")
 
 	var user db.User
-	db.DB.Select("admin").Where("email = ?", email).Find(&user)
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
 
-	if user.Admin != 1 {
+	if user.UserType != 3 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",
@@ -114,9 +111,9 @@ func WriteTour(c *fiber.Ctx) error {
 	email := c.Locals("email")
 
 	var user db.User
-	db.DB.Select("admin").Where("email = ?", email).Find(&user)
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
 
-	if user.Admin != 1 {
+	if user.UserType != 3 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",
@@ -150,9 +147,9 @@ func RemoveTour(c *fiber.Ctx) error {
 	email := c.Locals("email")
 
 	var user db.User
-	db.DB.Select("admin").Where("email = ?", email).Find(&user)
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
 
-	if user.Admin != 1 {
+	if user.UserType != 3 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",
@@ -201,9 +198,9 @@ func WritePartyAndEvents(c *fiber.Ctx) error {
 	email := c.Locals("email")
 
 	var user db.User
-	db.DB.Select("admin").Where("email = ?", email).Find(&user)
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
 
-	if user.Admin != 1 {
+	if user.UserType != 3 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",
@@ -237,9 +234,9 @@ func RemovePartyAndEvents(c *fiber.Ctx) error {
 	email := c.Locals("email")
 
 	var user db.User
-	db.DB.Select("admin").Where("email = ?", email).Find(&user)
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
 
-	if user.Admin != 1 {
+	if user.UserType != 3 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",

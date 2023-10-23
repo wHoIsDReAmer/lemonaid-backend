@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"time"
 )
 
@@ -94,8 +95,20 @@ func Register(c *fiber.Ctx) error {
 	videoMessenger := form.Value["video_messenger"]
 	videoMessengerId := form.Value["video_messenger_id"]
 
-	if firstName == nil || firstName[0] == "" || lastName == nil || lastName[0] == "" || email == nil || email[0] == "" || password == nil || password[0] == "" || phoneNumber == nil || phoneNumber[0] == "" || birthday == nil || birthday[0] == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Missing required fields"})
+	userType := form.Value["user_type"]
+
+	if firstName == nil || firstName[0] == "" || lastName == nil || lastName[0] == "" || email == nil || email[0] == "" || password == nil || password[0] == "" || phoneNumber == nil || phoneNumber[0] == "" || birthday == nil || birthday[0] == "" || userType == nil || userType[0] == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Missing required fields",
+		})
+	}
+
+	if v, err := strconv.Atoi(userType[0]); err != nil || (v != db.TEACHER && v != db.ACADEMY) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "User type is incorrect.",
+		})
 	}
 
 	var checkUser db.User
