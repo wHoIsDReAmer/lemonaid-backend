@@ -9,7 +9,7 @@ func Me(c *fiber.Ctx) error {
 	email := c.Locals("email")
 
 	var user db.User
-	db.DB.Select("first_name, last_name, email, phone_number, birthday, gender, nationality, visa_code, occupation, image, plan, admin").Where("email = ?", email).Find(&user)
+	db.DB.Select("first_name, last_name, email, phone_number, birthday, gender, nationality, visa_code, occupation, image, plan, user_type").Where("email = ?", email).Find(&user)
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
@@ -31,6 +31,7 @@ func Me(c *fiber.Ctx) error {
 //}
 
 func User(c *fiber.Ctx) error {
+	\
 	// TODO
 
 	return c.SendString("TODO")
