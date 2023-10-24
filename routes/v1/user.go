@@ -18,6 +18,18 @@ func Me(c *fiber.Ctx) error {
 }
 
 func Teachers(c *fiber.Ctx) error {
+	email := c.Locals("email")
+
+	var user db.User
+	db.DB.Select("user_type").Where("email = ?", email).Find(&user)
+
+	if user.UserType != 3 {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Permission denied",
+		})
+	}
+
 	var users []db.User
 	db.DB.
 		Select("id, first_name, last_name, email, phone_number, birthday, gender, nationality, image").
