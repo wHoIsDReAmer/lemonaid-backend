@@ -17,21 +17,20 @@ func Me(c *fiber.Ctx) error {
 	})
 }
 
-//func Teachers(c *fiber.Ctx) error {
-//	var users []db.User
-//	db.DB.
-//		Select("first_name, last_name, email, phone_number, birthday, gender, nationality, visa_code, occupation, image, plan, admin").
-//		Where("email = ?", email).
-//		Find(&users)
-//
-//	return c.JSON(fiber.Map{
-//		"status": fiber.StatusOK,
-//		"data":   user,
-//	})
-//}
+func Teachers(c *fiber.Ctx) error {
+	var users []db.User
+	db.DB.
+		Select("id, first_name, last_name, email, phone_number, birthday, gender, nationality, image").
+		Where("user_type = ?", "2").
+		Find(&users)
+
+	return c.JSON(fiber.Map{
+		"status": fiber.StatusOK,
+		"data":   users,
+	})
+}
 
 func User(c *fiber.Ctx) error {
-
 	// TODO
 
 	return c.SendString("TODO")

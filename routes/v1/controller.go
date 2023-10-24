@@ -59,6 +59,9 @@ func Controller(app *fiber.App) {
 	app.Use("/api/v1/auth/logout", authMiddleWare)
 	app.Post("/api/v1/auth/logout", Logout)
 
+	app.Use("/api/v1/user/teachers", authMiddleWare)
+	app.Post("/api/v1/user/teachers", Teachers)
+
 	app.Use("/api/v1/user/me", authMiddleWare)
 	app.Get("/api/v1/user/me", Me)
 }
