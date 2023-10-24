@@ -31,7 +31,7 @@ func Me(c *fiber.Ctx) error {
 //}
 
 func User(c *fiber.Ctx) error {
-	\
+
 	// TODO
 
 	return c.SendString("TODO")
