@@ -32,12 +32,19 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var user db.User
-	result := db.DB.Select("email", "password", "salt").Where("email = ?", body.Email).Find(&user)
+	result := db.DB.Select("email, user_accepted", "password", "salt").Where("email = ?", body.Email).Find(&user)
 
 	if result.RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  fiber.StatusNotFound,
 			"message": "Email has not found",
+		})
+	}
+
+	if user.UserAccepted == 0 {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Cannot access until admin accept you",
 		})
 	}
 
@@ -264,6 +271,55 @@ func Logout(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
 		"message": "Successfully logout",
+	})
+}
+
+func GetApprovalQueue(c *fiber.Ctx) error {
+	var queues []db.RegisterApproval
+
+	db.DB.Find(&queues)
+
+	return c.JSON(fiber.Map{
+		"status": fiber.StatusOK,
+		"data":   queues,
+	})
+}
+
+type AcceptBody struct {
+	Email string `json:"email"`
+}
+
+func AcceptUser(c *fiber.Ctx) error {
+	var body AcceptBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Cannot parse body",
+			})
+	}
+
+	var user db.User
+
+	result := db.DB.Select("id, email, user_accepted").
+		Where("email = ?", body.Email).
+		Find(&user)
+
+	if result.RowsAffected == 0 || user.UserAccepted != 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status": fiber.StatusNotAcceptable,
+				"message": "probably " +
+					"it was gonna accepted or user has not found",
+			})
+	}
+
+	go db.DB.Model(&user).
+		Update("user_accepted", 1)
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully approval user",
 	})
 }
 

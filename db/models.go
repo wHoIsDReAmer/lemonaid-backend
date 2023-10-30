@@ -43,7 +43,8 @@ type User struct {
 	Image            *string `gorm:"size:255" json:"image_path"`
 	Plan             int     `gorm:"default:0" json:"plan"`
 
-	UserType int `gorm:"default:0" json:"user_type"`
+	UserAccepted int `gorm:"size:1;default:0" json:"-"`
+	UserType     int `gorm:"default:0" json:"user_type"`
 }
 
 type Tour struct {
@@ -106,4 +107,10 @@ type ApplyJobPost struct {
 	JobPost   JobPost `gorm:"ForeignKey:JobPostID;References:ID"`
 	UserID    uint
 	User      User `gorm:"ForeignKey:UserID;References:ID"`
+}
+
+type RegisterApproval struct {
+	gorm.Model
+	UserID int
+	User   User `gorm:"ForeignKey:UserID;References:ID"`
 }
