@@ -108,9 +108,3 @@ type ApplyJobPost struct {
 	UserID    uint
 	User      User `gorm:"ForeignKey:UserID;References:ID"`
 }
-
-type RegisterApproval struct {
-	gorm.Model
-	UserID int
-	User   User `gorm:"ForeignKey:UserID;References:ID"`
-}

@@ -275,9 +275,9 @@ func Logout(c *fiber.Ctx) error {
 }
 
 func GetApprovalQueue(c *fiber.Ctx) error {
-	var queues []db.RegisterApproval
+	var queues []db.User
 
-	db.DB.Find(&queues)
+	db.DB.Where("user_accepted = 0").Find(&queues)
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
