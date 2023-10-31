@@ -12,6 +12,9 @@ import (
 
 func main() {
 	dotenv.Load(".env")
+
+	//v1.SendMail("lcw060403@gmail.com", "helo", "hellow orld!")
+
 	var port = os.Getenv("PORT")
 
 	db.Init() // init the db

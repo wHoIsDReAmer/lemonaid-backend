@@ -21,8 +21,17 @@ func authMiddleWare(c *fiber.Ctx) error {
 }
 
 func adminMiddleWare(c *fiber.Ctx) error {
-	authMiddleWare(c)
+	token := c.Get(fiber.HeaderAuthorization, "")
 
+	var session db.Session
+	if rst := db.DB.Select("email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusUnauthorized,
+			"message": "Unauthorized",
+		})
+	}
+
+	c.Locals("email", session.Email)
 	email := c.Locals("email")
 
 	var user db.User
