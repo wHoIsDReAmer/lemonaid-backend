@@ -286,7 +286,7 @@ func GetApprovalQueue(c *fiber.Ctx) error {
 }
 
 type AcceptBody struct {
-	Email string `json:"email"`
+	Email []string `json:"email"`
 }
 
 func AcceptUser(c *fiber.Ctx) error {
