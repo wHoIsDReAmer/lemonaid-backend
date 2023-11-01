@@ -61,6 +61,9 @@ func Controller(app *fiber.App) {
 	app.Use("/api/v1/auth/accept_user", adminMiddleWare)
 	app.Put("/api/v1/auth/accept_user", AcceptUser)
 
+	app.Use("/api/v1/auth/deny_user", adminMiddleWare)
+	app.Put("/api/v1/auth/deny_user", DenyUser)
+
 	app.Use("/api/v1/search/search_posts_and_teachers", authMiddleWare)
 	app.Get("/api/v1/search/search_posts_and_teachers", SearchPostAndTeachers)
 }
