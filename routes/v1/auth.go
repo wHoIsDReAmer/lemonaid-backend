@@ -302,7 +302,7 @@ func AcceptUser(c *fiber.Ctx) error {
 	var user db.User
 
 	result := db.DB.Select("id, email, user_accepted").
-		Where("email = ?", body.Email).
+		Where("email in ?", body.Email).
 		Find(&user)
 
 	if result.RowsAffected == 0 || user.UserAccepted != 0 {
