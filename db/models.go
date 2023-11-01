@@ -32,10 +32,10 @@ type User struct {
 	Gender      *string   `gorm:"size:30" json:"gender"`
 	Nationality *string   `gorm:"size:100;default:'Republic of Korea'" json:"nationality"`
 	VisaCode    *string   `gorm:"size:16" json:"visa_code"`
-	Occupation  *string   `gorm:"size:32" json:"occupation"`
+	//Occupation  *string   `gorm:"size:32" json:"occupation"`
 
-	Manners int `gorm:"default:0" json:"manners"`
-	Amateur int `gorm:"default:0" json:"amateur"`
+	//Manners int `gorm:"default:0" json:"manners"`
+	//Amateur int `gorm:"default:0" json:"amateur"`
 
 	VideoMessenger   *string `gorm:"size:255" json:"video_messenger"`
 	VideoMessengerID *string `gorm:"size:255" json:"video_messenger_id"`
