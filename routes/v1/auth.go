@@ -285,12 +285,12 @@ func GetApprovalQueue(c *fiber.Ctx) error {
 	})
 }
 
-type AcceptBody struct {
+type AcceptDenyBody struct {
 	Email []string `json:"email"`
 }
 
 func AcceptUser(c *fiber.Ctx) error {
-	var body AcceptBody
+	var body AcceptDenyBody
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{
@@ -299,18 +299,17 @@ func AcceptUser(c *fiber.Ctx) error {
 			})
 	}
 
-	var user db.User
+	var user []db.User
 
 	result := db.DB.Select("id, email, user_accepted").
 		Where("email in ?", body.Email).
 		Find(&user)
 
-	if result.RowsAffected == 0 || user.UserAccepted != 0 {
+	if result.RowsAffected == 0 {
 		return c.Status(fiber.StatusNotAcceptable).
 			JSON(fiber.Map{
-				"status": fiber.StatusNotAcceptable,
-				"message": "probably " +
-					"it was gonna accepted or user has not found",
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Probably user has not found",
 			})
 	}
 
@@ -320,6 +319,38 @@ func AcceptUser(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
 		"message": "Successfully approval user",
+	})
+}
+
+func DenyUser(c *fiber.Ctx) error {
+	var body AcceptDenyBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Cannot parse body",
+			})
+	}
+
+	var user []db.User
+
+	result := db.DB.Select("id, email, user_accepted").
+		Where("email in ?", body.Email).
+		Find(&user)
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Probably user has not found",
+			})
+	}
+
+	go db.DB.Delete(&user)
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully deny user",
 	})
 }
 
