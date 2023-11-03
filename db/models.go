@@ -69,20 +69,22 @@ type Tour struct {
 type JobPost struct {
 	gorm.Model
 
+	Academy  string `gorm:"size:255" json:"academy"`
+	Campus   string `gorm:"size:255" json:"campus"`
+	Category string `gorm:"size:255" json:"category"`
+
 	// Seperate by ","
 	Images *string `gorm:"size:255" json:"images"`
 
 	Location     string `gorm:"size255" json:"location"`
-	PostName     string `gorm:"size:255" json:"post_name"`
-	PostOwn      string `gorm:"size:255" json:"post_own"`
 	Position     string `gorm:"size:255" json:"position"`
-	SalaryMin    uint   `json:"salary_min"`
-	SalaryMax    uint   `json:"salary_max"`
+	SalaryMin    string `json:"salary_min"`
+	SalaryMax    string `json:"salary_max"`
 	StudentLevel string `gorm:"size:255" json:"student_level"`
 
 	// Two column types will be to string
-	WorkingHoursMin uint `json:"working_hours_min"`
-	WorkingHoursMax uint `json:"working_hours_max"`
+	WorkingHoursMin string `json:"working_hours_min"`
+	WorkingHoursMax string `json:"working_hours_max"`
 
 	PaidVacation     uint   `json:"paid_vacation"`
 	AnnualLeave      uint   `json:"annual_leave"`

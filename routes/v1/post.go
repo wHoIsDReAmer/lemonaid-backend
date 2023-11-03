@@ -37,7 +37,7 @@ func WriteJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	if body.PostName == "" || body.PostOwn == "" || body.Position == "" || body.StudentLevel == "" || body.Severance == "" || body.Insurance == "" || body.Housing == "" || body.HousingAllowance == "" {
+	if body.Academy == "" || body.Campus == "" || body.Category == "" || body.Position == "" || body.StudentLevel == "" || body.Severance == "" || body.Insurance == "" || body.Housing == "" || body.HousingAllowance == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
 			"message": "Missing required field",
@@ -102,7 +102,7 @@ func UpdateJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	if body.Id == nil || body.PostName == "" || body.PostOwn == "" || body.Position == "" || body.StudentLevel == "" || body.Severance == "" || body.Insurance == "" || body.Housing == "" || body.HousingAllowance == "" {
+	if body.Id == nil || body.Academy == "" || body.Campus == "" || body.Category == "" || body.Position == "" || body.StudentLevel == "" || body.Severance == "" || body.Insurance == "" || body.Housing == "" || body.HousingAllowance == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
 			"message": "Missing required field",
@@ -512,7 +512,7 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	var data interface{}
 	if postType[0] == JobPost {
 		data = db.JobPost{}
-	} else if postType[0] == TOUR {
+	} else if postType[0] == Tour {
 		data = db.Tour{}
 	} else if postType[0] == PartyAndEvents {
 		data = db.PartyAndEvents{}
