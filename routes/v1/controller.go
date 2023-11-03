@@ -18,33 +18,43 @@ func Controller(app *fiber.App) {
 	app.Post("/api/v1/auth/login", Login)
 	app.Post("/api/v1/auth/register", Register)
 
-	app.Use("/api/v1/post/get_job_posts", authMiddleWare)
-	app.Post("/api/v1/post/get_job_posts", GetJobPosts)
-	app.Use("/api/v1/post/write_job_post", adminMiddleWare)
-	app.Put("/api/v1/post/write_job_post", WriteJobPost)
-	app.Use("/api/v1/post/update_job_post", adminMiddleWare)
-	app.Post("/api/v1/post/update_job_post", UpdateJobPost)
-	app.Use("/api/v1/post/remove_job_post", adminMiddleWare)
-	app.Delete("/api/v1/post/remove_job_post", RemoveJobPost)
+	app.Use("/api/v1/post/job_post", authMiddleWare)
+	app.Get("/api/v1/post/job_post", GetJobPosts)
+	app.Post("/api/v1/post/job_post", WriteJobPost)
+	app.Put("/api/v1/post/job_post", UpdateJobPost)
+	app.Delete("/api/v1/post/job_post", RemoveJobPost)
+
+	app.Use("/api/v1/post/pending_job_post", adminMiddleWare)
+	app.Get("/api/v1/post/pending_job_post", GetPendingJobPosts)
+	app.Put("/api/v1/post/pending_job_post", AcceptPendingJobPost)
+	app.Delete("/api/v1/post/pending_job_post", DenyPendingJobPost)
 
 	app.Use("/api/v1/post/apply_job_post", authMiddleWare)
 	app.Post("/api/v1/post/apply_job_post", ApplyJobPost)
 
-	app.Post("/api/v1/post/get_tours", GetTours)
-	app.Use("/api/v1/post/write_tour", adminMiddleWare)
-	app.Put("/api/v1/post/write_tour", WriteTour)
-	app.Use("/api/v1/post/update_tour", adminMiddleWare)
-	app.Post("/api/v1/post/update_tour", UpdateTour)
-	app.Use("/api/v1/post/remove_tour", adminMiddleWare)
-	app.Delete("/api/v1/post/remove_tour", RemoveTour)
+	// idk pending
+	//app.Get("/api/v1/post/apply_job_post", ApplyJobPostApprovalQueue)
+	//app.Put("/api/v1/post/apply_job_post", AcceptApplyJobPost)
+	//app.Delete("/api/v1/post/apply_job_post", DenyApplyJobPost)
 
-	app.Post("/api/v1/post/get_party_and_events", GetPartyAndEvents)
-	app.Use("/api/v1/post/write_party_and_events", adminMiddleWare)
-	app.Put("/api/v1/post/write_party_and_events", WritePartyAndEvents)
-	app.Use("/api/v1/post/update_party_and_events", adminMiddleWare)
-	app.Post("/api/v1/post/update_party_and_events", UpdatePartyAndEvents)
-	app.Use("/api/v1/post/remove_party_and_events", adminMiddleWare)
-	app.Delete("/api/v1/post/remove_party_and_events", RemovePartyAndEvents)
+	app.Get("/api/v1/post/tour", GetTours)
+	app.Use("/api/v1/post/tour", adminMiddleWare)
+	app.Post("/api/v1/post/tour", WriteTour)
+	app.Put("/api/v1/post/tour", UpdateTour)
+	app.Delete("/api/v1/post/tour", RemoveTour)
+
+	app.Get("/api/v1/post/party_and_events", GetPartyAndEvents)
+
+	app.Use("/api/v1/post/party_and_events", adminMiddleWare)
+	app.Post("/api/v1/post/party_and_events", WritePartyAndEvents)
+	app.Put("/api/v1/post/party_and_events", UpdatePartyAndEvents)
+	app.Delete("/api/v1/post/party_and_events", RemovePartyAndEvents)
+
+	app.Use("/api/v1/post/job_images_upload", authMiddleWare)
+	app.Post("/api/v1/post/job_images_upload", UploadImageToJobPost)
+
+	app.Use("/api/v1/post/images_upload", adminMiddleWare)
+	app.Post("/api/v1/post/images_upload", UploadImageToPost)
 
 	app.Use("/api/v1/auth/logout", authMiddleWare)
 	app.Post("/api/v1/auth/logout", Logout)
@@ -55,14 +65,14 @@ func Controller(app *fiber.App) {
 	app.Use("/api/v1/user/me", authMiddleWare)
 	app.Get("/api/v1/user/me", Me)
 
-	app.Use("/api/v1/auth/approval_queue", adminMiddleWare)
-	app.Get("/api/v1/auth/approval_queue", GetApprovalQueue)
+	app.Use("/api/v1/user", adminMiddleWare)
+	app.Get("/api/v1/user", User)
+	app.Put("/api/v1/user", UserEdit)
 
-	app.Use("/api/v1/auth/accept_user", adminMiddleWare)
-	app.Put("/api/v1/auth/accept_user", AcceptUser)
-
-	app.Use("/api/v1/auth/deny_user", adminMiddleWare)
-	app.Delete("/api/v1/auth/deny_user", DenyUser)
+	app.Use("/api/v1/auth/approval_user", adminMiddleWare)
+	app.Get("/api/v1/auth/approval_user", UserApprovalQueue)
+	app.Put("/api/v1/auth/approval_user", AcceptUser)
+	app.Delete("/api/v1/auth/approval_user", DenyUser)
 
 	app.Use("/api/v1/search/search_posts_and_teachers", authMiddleWare)
 	app.Get("/api/v1/search/search_posts_and_teachers", SearchPostAndTeachers)

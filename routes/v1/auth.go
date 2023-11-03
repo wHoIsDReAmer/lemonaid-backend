@@ -9,7 +9,6 @@ import (
 	"io"
 	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -140,7 +139,8 @@ func Register(c *fiber.Ctx) error {
 	if profile != nil {
 		h := profile[0]
 
-		path := "./contents/" + hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename)
+		filename := hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename)
+		path := "./contents/" + filename
 		imagePath = &path
 
 		go func() {
@@ -151,14 +151,18 @@ func Register(c *fiber.Ctx) error {
 			file, _ := h.Open()
 			defer file.Close()
 
-			os.MkdirAll("./public/contents", 0777)
+			buffer, err := io.ReadAll(file)
 
-			dst, _ := os.Create("./public/contents/" + hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename))
-			defer dst.Close()
-
-			if _, err := io.Copy(dst, file); err != nil {
-				fmt.Println("Error occurs when writing file.")
+			if err != nil {
+				fmt.Println("Error while image writing..")
 			}
+
+			customutils.ImageProcessing(buffer, 70, filename)
+
+			//os.MkdirAll("./public/contents", 0777)
+			//
+			//dst, _ := os.Create("./public/contents/" + hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename))
+			//defer dst.Close()
 		}()
 	}
 
@@ -266,7 +270,7 @@ func Logout(c *fiber.Ctx) error {
 		})
 	}
 
-	db.DB.Unscoped().Delete(sess)
+	go db.DB.Unscoped().Delete(sess)
 
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
@@ -274,7 +278,7 @@ func Logout(c *fiber.Ctx) error {
 	})
 }
 
-func GetApprovalQueue(c *fiber.Ctx) error {
+func UserApprovalQueue(c *fiber.Ctx) error {
 	var queues []db.User
 
 	db.DB.Where("user_accepted = 0").Find(&queues)
@@ -285,12 +289,12 @@ func GetApprovalQueue(c *fiber.Ctx) error {
 	})
 }
 
-type AcceptDenyBody struct {
+type UserAcceptDenyBody struct {
 	Email []string `json:"email"`
 }
 
 func AcceptUser(c *fiber.Ctx) error {
-	var body AcceptDenyBody
+	var body UserAcceptDenyBody
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{
@@ -301,15 +305,15 @@ func AcceptUser(c *fiber.Ctx) error {
 
 	var user []db.User
 
-	result := db.DB.Select("id, email, user_accepted").
-		Where("email in ?", body.Email).
+	result := db.DB.Select("id, user_accepted").
+		Where("email in (?)", body.Email).
 		Find(&user)
 
 	if result.RowsAffected == 0 {
 		return c.Status(fiber.StatusNotAcceptable).
 			JSON(fiber.Map{
 				"status":  fiber.StatusNotAcceptable,
-				"message": "Probably user has not found",
+				"message": "Queue item not found",
 			})
 	}
 
@@ -323,7 +327,7 @@ func AcceptUser(c *fiber.Ctx) error {
 }
 
 func DenyUser(c *fiber.Ctx) error {
-	var body AcceptDenyBody
+	var body UserAcceptDenyBody
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{
@@ -332,21 +336,16 @@ func DenyUser(c *fiber.Ctx) error {
 			})
 	}
 
-	var user []db.User
-
-	result := db.DB.Select("id, email, user_accepted").
-		Where("email in ?", body.Email).
-		Find(&user)
+	result := db.DB.Unscoped().Model(&db.User{}).Where("email in (?)").
+		Delete(&db.User{})
 
 	if result.RowsAffected == 0 {
 		return c.Status(fiber.StatusNotAcceptable).
 			JSON(fiber.Map{
 				"status":  fiber.StatusNotAcceptable,
-				"message": "Probably user has not found",
+				"message": "Queue item not found",
 			})
 	}
-
-	go db.DB.Delete(&user)
 
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,

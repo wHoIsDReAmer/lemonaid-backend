@@ -1,9 +1,21 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"io"
+	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
+	"path/filepath"
+	"strings"
+)
+
+const (
+	JOB_POST         = "JOB_POST"
+	TOUR             = "TOUR"
+	PARTY_AND_EVENTS = "PARTY_AND_EVENTS"
 )
 
 func GetJobPosts(c *fiber.Ctx) error {
@@ -12,7 +24,7 @@ func GetJobPosts(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status": 200,
-		"arrays": posts,
+		"data":   posts,
 	})
 }
 
@@ -32,11 +44,14 @@ func WriteJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	db.DB.Create(&body)
+	_body := db.PendingJobPost{}
+	_body.JobPost = body
+
+	go db.DB.Create(&_body)
 
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
-		"message": "Created post",
+		"message": "A pending post has been created. Please wait for administrator to confirm.",
 	})
 }
 
@@ -49,7 +64,7 @@ func RemoveJobPost(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
-			"message": "Data is not correct",
+			"message": "Cannot parse body",
 		})
 	}
 
@@ -83,7 +98,7 @@ func UpdateJobPost(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
-			"message": "Data is incorrect",
+			"message": "Cannot parse body",
 		})
 	}
 
@@ -110,11 +125,69 @@ func UpdateJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	db.DB.Save(&post)
+	go db.DB.Save(&post)
 
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
 		"message": "Post updated",
+	})
+}
+
+func GetPendingJobPosts(c *fiber.Ctx) error {
+	var queue []db.PendingJobPost
+
+	db.DB.Select(&queue)
+
+	return c.JSON(fiber.Map{
+		"status": fiber.StatusOK,
+		"data":   queue,
+	})
+}
+
+type PendingJobPostBody struct {
+	Id []uint `json:"id"`
+}
+
+func AcceptPendingJobPost(c *fiber.Ctx) error {
+	var body PendingJobPostBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Cannot parse body",
+		})
+	}
+
+	var columns []db.PendingJobPost
+	db.DB.Where("id in (?)", body.Id).
+		Find(&columns)
+
+	for _, value := range columns {
+		db.DB.Create(&value.JobPost)
+	}
+
+	go db.DB.Unscoped().Delete(&columns)
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully accept job post",
+	})
+}
+
+func DenyPendingJobPost(c *fiber.Ctx) error {
+	var body PendingJobPostBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Cannot parse body",
+		})
+	}
+
+	db.DB.Unscoped().Where("id in (?)", body.Id).
+		Delete(&[]db.PendingJobPost{})
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully deny job post",
 	})
 }
 
@@ -129,7 +202,7 @@ func GetTours(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
-		"arrays": tours,
+		"data":   tours,
 	})
 }
 
@@ -138,7 +211,7 @@ func WriteTour(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
-			"message": "Data is not correct",
+			"message": "Cannot parse body",
 		})
 	}
 
@@ -201,7 +274,7 @@ func RemoveTour(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
-			"message": "Data is not correct",
+			"message": "Cannot parse body",
 		})
 	}
 
@@ -236,7 +309,7 @@ func GetPartyAndEvents(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
-		"arrays": partyAndEvents,
+		"data":   partyAndEvents,
 	})
 }
 
@@ -245,7 +318,7 @@ func WritePartyAndEvents(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
-			"message": "Data is not correct",
+			"message": "Cannot parse body",
 		})
 	}
 
@@ -309,7 +382,7 @@ func RemovePartyAndEvents(c *fiber.Ctx) error {
 	if err := c.BodyParser(&body); err != nil {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
-			"message": "Data is not correct",
+			"message": "Cannot parse body",
 		})
 	}
 
@@ -330,6 +403,158 @@ func RemovePartyAndEvents(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusBadRequest,
+	})
+}
+
+func UploadImageToJobPost(c *fiber.Ctx) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest,
+			"It's incorrect request. "+
+				"multipart form must be provided")
+	}
+
+	id := form.Value["id"]
+	images := form.File["images"]
+
+	if id == nil || len(images) > 4 || len(images) == 0 {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Data is incorrect",
+			})
+	}
+
+	var data db.JobPost
+
+	fileNames := make([]string, 4)
+
+	for _, value := range images {
+		//os.MkdirAll("./public/contents", 0777)
+		fileName := uuid.New().String() + filepath.Ext(value.Filename)
+		fileNames = append(fileNames, "./contents/"+fileName)
+
+		go func() {
+			file, _ := value.Open()
+			defer file.Close()
+
+			buffer, err := io.ReadAll(file)
+
+			if err != nil {
+				fmt.Println("Error occurs while image writing..")
+				return
+			}
+
+			customutils.ImageProcessing(buffer, 70, fileName)
+		}()
+	}
+
+	result := db.DB.Model(&data).
+		Where("id = ?", id).
+		Update("images", strings.Join(fileNames, ","))
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Cannot find post id",
+			})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully upload images",
+	})
+}
+
+func UploadImageToPost(c *fiber.Ctx) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest,
+			"It's incorrect request. "+
+				"multipart form must be provided")
+	}
+
+	checkArr := []string{
+		JOB_POST,
+		TOUR,
+		PARTY_AND_EVENTS,
+	}
+
+	id := form.Value["id"]
+	postType := form.Value["post_type"]
+
+	images := form.File["images"]
+
+	if id == nil || postType == nil || len(images) > 4 || len(images) == 0 {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Data is incorrect",
+			})
+	}
+
+	flag := false
+	for _, value := range checkArr {
+		if value == postType[0] {
+			flag = true
+		}
+	}
+
+	if !flag {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Data is incorrect",
+			})
+	}
+
+	var data interface{}
+	if postType[0] == JOB_POST {
+		data = db.JobPost{}
+	} else if postType[0] == TOUR {
+		data = db.Tour{}
+	} else if postType[0] == PARTY_AND_EVENTS {
+		data = db.PartyAndEvents{}
+	}
+
+	fileNames := make([]string, 4)
+
+	for _, value := range images {
+		//os.MkdirAll("./public/contents", 0777)
+		fileName := uuid.New().String() + filepath.Ext(value.Filename)
+		fileNames = append(fileNames, "./contents/"+fileName)
+
+		go func() {
+			file, _ := value.Open()
+			defer file.Close()
+
+			buffer, err := io.ReadAll(file)
+
+			if err != nil {
+				fmt.Println("Error occurs while image writing..")
+				return
+			}
+
+			customutils.ImageProcessing(buffer, 70, fileName)
+		}()
+	}
+
+	result := db.DB.Model(&data).
+		Where("id = ?", id).
+		Update("images", strings.Join(fileNames, ","))
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Cannot find post id",
+			})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully upload images",
 	})
 }
 
@@ -376,5 +601,85 @@ func ApplyJobPost(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
 		"message": "Success",
+	})
+}
+
+func ApplyJobPostApprovalQueue(c *fiber.Ctx) error {
+	var queues []db.ApplyJobPost
+
+	db.DB.Find(&queues)
+
+	return c.JSON(fiber.Map{
+		"status": fiber.StatusOK,
+		"data":   queues,
+	})
+}
+
+type ApplyJobPostAcceptDenyBody struct {
+	Id []uint `json:"id"`
+}
+
+func AcceptApplyJobPost(c *fiber.Ctx) error {
+	var body ApplyJobPostAcceptDenyBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Cannot parse body",
+			})
+	}
+
+	var queue []db.ApplyJobPost
+
+	result := db.DB.
+		Where("id in (?)", body.Id).
+		Find(&queue)
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Queue item not found",
+			})
+	}
+
+	for _, value := range queue {
+		db.DB.Create(&value.JobPost)
+	}
+
+	go db.DB.Unscoped().Delete(&queue)
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully approval queue",
+	})
+}
+
+func DenyApplyJobPost(c *fiber.Ctx) error {
+	var body ApplyJobPostAcceptDenyBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Cannot parse body",
+			})
+	}
+
+	result := db.DB.
+		Unscoped().
+		Where("id in (?)", body.Id).
+		Delete(&db.ApplyJobPost{})
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Queue item not found",
+			})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully deny user",
 	})
 }

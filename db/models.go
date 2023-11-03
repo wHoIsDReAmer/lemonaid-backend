@@ -32,10 +32,12 @@ type User struct {
 	Gender      *string   `gorm:"size:30" json:"gender"`
 	Nationality *string   `gorm:"size:100;default:'Republic of Korea'" json:"nationality"`
 	VisaCode    *string   `gorm:"size:16" json:"visa_code"`
-	//Occupation  *string   `gorm:"size:32" json:"occupation"`
+	Occupation  *string   `gorm:"size:32" json:"occupation"`
 
-	//Manners int `gorm:"default:0" json:"manners"`
-	//Amateur int `gorm:"default:0" json:"amateur"`
+	// Will be deleted
+	Manners int `gorm:"default:0" json:"manners"`
+	// Will be deleted
+	Amateur int `gorm:"default:0" json:"amateur"`
 
 	VideoMessenger   *string `gorm:"size:255" json:"video_messenger"`
 	VideoMessengerID *string `gorm:"size:255" json:"video_messenger_id"`
@@ -49,6 +51,10 @@ type User struct {
 
 type Tour struct {
 	gorm.Model
+
+	// Seperate by ","
+	Images *string `gorm:"size:255" json:"images"`
+
 	TourName    string `gorm:"size:255" json:"tour_name"`
 	Description string `gorm:"size:255" json:"description"`
 	PostOwn     string `gorm:"size:255" json:"post_own"`
@@ -62,15 +68,21 @@ type Tour struct {
 
 type JobPost struct {
 	gorm.Model
-	Location        string `gorm:"size255" json:"location"`
-	PostName        string `gorm:"size:255" json:"post_name"`
-	PostOwn         string `gorm:"size:255" json:"post_own"`
-	Position        string `gorm:"size:255" json:"position"`
-	SalaryMin       uint   `json:"salary_min"`
-	SalaryMax       uint   `json:"salary_max"`
-	StudentLevel    string `gorm:"size:255" json:"student_level"`
-	WorkingHoursMin uint   `json:"working_hours_min"`
-	WorkingHoursMax uint   `json:"working_hours_max"`
+
+	// Seperate by ","
+	Images *string `gorm:"size:255" json:"images"`
+
+	Location     string `gorm:"size255" json:"location"`
+	PostName     string `gorm:"size:255" json:"post_name"`
+	PostOwn      string `gorm:"size:255" json:"post_own"`
+	Position     string `gorm:"size:255" json:"position"`
+	SalaryMin    uint   `json:"salary_min"`
+	SalaryMax    uint   `json:"salary_max"`
+	StudentLevel string `gorm:"size:255" json:"student_level"`
+
+	// Two column types will be to string
+	WorkingHoursMin uint `json:"working_hours_min"`
+	WorkingHoursMax uint `json:"working_hours_max"`
 
 	PaidVacation     uint   `json:"paid_vacation"`
 	AnnualLeave      uint   `json:"annual_leave"`
@@ -79,10 +91,22 @@ type JobPost struct {
 	Housing          string `gorm:"size:255" json:"housing"`
 	HousingAllowance string `gorm:"size:255" json:"housing_allowance"`
 	Rank             int    `gorm:"size:1" json:"rank"`
+
+	UserID uint
+	User   User `gorm:"ForeignKey:UserID;References:ID"`
+}
+
+type PendingJobPost struct {
+	gorm.Model
+	JobPost
 }
 
 type PartyAndEvents struct {
 	gorm.Model
+
+	// Seperate by ","
+	Images *string `gorm:"size:255" json:"images"`
+
 	PartyName   string `gorm:"size:255" json:"party_name"`
 	Description string `gorm:"size:255" json:"description"`
 	PostOwn     string `gorm:"size:255" json:"post_own"`

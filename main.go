@@ -13,7 +13,7 @@ import (
 func main() {
 	dotenv.Load(".env")
 
-	v1.SendMail("lcw060403@gmail.com", "hello world", "helo world", "heihg")
+	//v1.SendMail("lcw060403@gmail.com", "hello world", "helo world", "heihg")
 
 	var port = os.Getenv("PORT")
 
