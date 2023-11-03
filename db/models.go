@@ -78,13 +78,13 @@ type JobPost struct {
 
 	Location     string `gorm:"size255" json:"location"`
 	Position     string `gorm:"size:255" json:"position"`
-	SalaryMin    string `json:"salary_min"`
-	SalaryMax    string `json:"salary_max"`
+	SalaryMin    string `json:"start_salary"`
+	SalaryMax    string `json:"end_salary"`
 	StudentLevel string `gorm:"size:255" json:"student_level"`
 
 	// Two column types will be to string
-	WorkingHoursMin string `json:"working_hours_min"`
-	WorkingHoursMax string `json:"working_hours_max"`
+	WorkingHoursMin string `json:"working_hours_start"`
+	WorkingHoursMax string `json:"working_hours_end"`
 
 	PaidVacation     uint   `json:"paid_vacation"`
 	AnnualLeave      uint   `json:"annual_leave"`

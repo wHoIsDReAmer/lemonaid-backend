@@ -47,9 +47,10 @@ func WriteJobPost(c *fiber.Ctx) error {
 	_body := db.PendingJobPost{}
 	_body.JobPost = body
 
-	go db.DB.Create(&_body)
+	db.DB.Create(&_body)
 
 	return c.JSON(fiber.Map{
+		"id": _body.ID
 		"status":  fiber.StatusOK,
 		"message": "A pending post has been created. Please wait for administrator to confirm.",
 	})
@@ -136,7 +137,7 @@ func UpdateJobPost(c *fiber.Ctx) error {
 func GetPendingJobPosts(c *fiber.Ctx) error {
 	var queue []db.PendingJobPost
 
-	db.DB.Select(&queue)
+	db.DB.Find(&queue)
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
@@ -222,9 +223,10 @@ func WriteTour(c *fiber.Ctx) error {
 		})
 	}
 
-	go db.DB.Create(&body)
+	db.DB.Create(&body)
 
 	return c.JSON(fiber.Map{
+		"id": body.ID,
 		"status":  fiber.StatusOK,
 		"message": "Successfully created",
 	})
@@ -329,9 +331,10 @@ func WritePartyAndEvents(c *fiber.Ctx) error {
 		})
 	}
 
-	go db.DB.Create(&body)
+	db.DB.Create(&body)
 
 	return c.JSON(fiber.Map{
+		"id": body.ID,
 		"status":  fiber.StatusOK,
 		"message": "Successfully created",
 	})

@@ -12,7 +12,6 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
-	github.com/h2non/bimg v1.1.9 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
@@ -23,6 +22,5 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.50.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 )
