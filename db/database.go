@@ -31,6 +31,7 @@ func Init() {
 
 	_ = DB.AutoMigrate(&User{})
 	_ = DB.AutoMigrate(&JobPost{})
+	_ = DB.AutoMigrate(&PendingJobPost{})
 	_ = DB.AutoMigrate(&Tour{})
 	_ = DB.AutoMigrate(&PartyAndEvents{})
 	_ = DB.AutoMigrate(&Session{})

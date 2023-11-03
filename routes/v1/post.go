@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	JOB_POST         = "JOB_POST"
-	TOUR             = "TOUR"
-	PARTY_AND_EVENTS = "PARTY_AND_EVENTS"
+	JobPost        = "JOB_POST"
+	Tour           = "TOUR"
+	PartyAndEvents = "PARTY_AND_EVENTS"
 )
 
 func GetJobPosts(c *fiber.Ctx) error {
@@ -476,9 +476,9 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	}
 
 	checkArr := []string{
-		JOB_POST,
-		TOUR,
-		PARTY_AND_EVENTS,
+		JobPost,
+		Tour,
+		PartyAndEvents,
 	}
 
 	id := form.Value["id"]
@@ -510,11 +510,11 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	}
 
 	var data interface{}
-	if postType[0] == JOB_POST {
+	if postType[0] == JobPost {
 		data = db.JobPost{}
 	} else if postType[0] == TOUR {
 		data = db.Tour{}
-	} else if postType[0] == PARTY_AND_EVENTS {
+	} else if postType[0] == PartyAndEvents {
 		data = db.PartyAndEvents{}
 	}
 

@@ -71,8 +71,8 @@ func User(c *fiber.Ctx) error {
 }
 
 type UserEditBody struct {
-	Id       int
-	Password string
+	Id       int    `json:"id"`
+	Password string `json:"password"`
 }
 
 func UserEdit(c *fiber.Ctx) error {
