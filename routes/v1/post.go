@@ -430,7 +430,7 @@ func UploadImageToJobPost(c *fiber.Ctx) error {
 
 	var data db.JobPost
 
-	fileNames := make([]string, 4)
+	fileNames := make([]string, 1)
 
 	for _, value := range images {
 		//os.MkdirAll("./public/contents", 0777)
@@ -451,7 +451,7 @@ func UploadImageToJobPost(c *fiber.Ctx) error {
 			customutils.ImageProcessing(buffer, 70, fileName)
 		}()
 	}
-
+	
 	result := db.DB.Model(&data).
 		Where("id = ?", id).
 		Update("images", strings.Join(fileNames, ","))
@@ -488,6 +488,8 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	postType := form.Value["post_type"]
 
 	images := form.File["images"]
+	
+	fmt.Println(len(images))
 
 	if id == nil || postType == nil || len(images) > 4 || len(images) == 0 {
 		return c.Status(fiber.StatusBadRequest).
@@ -521,7 +523,7 @@ func UploadImageToPost(c *fiber.Ctx) error {
 		data = db.PartyAndEvents{}
 	}
 
-	fileNames := make([]string, 4)
+	fileNames := []string {}
 
 	for _, value := range images {
 		//os.MkdirAll("./public/contents", 0777)
