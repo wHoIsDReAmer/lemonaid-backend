@@ -50,7 +50,7 @@ func WriteJobPost(c *fiber.Ctx) error {
 	db.DB.Create(&_body)
 
 	return c.JSON(fiber.Map{
-		"id": _body.ID
+		"id": _body.ID,
 		"status":  fiber.StatusOK,
 		"message": "A pending post has been created. Please wait for administrator to confirm.",
 	})
