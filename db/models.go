@@ -100,7 +100,34 @@ type JobPost struct {
 
 type PendingJobPost struct {
 	gorm.Model
-	JobPost
+
+	Academy  string `gorm:"size:255" json:"academy"`
+	Campus   string `gorm:"size:255" json:"campus"`
+	Category string `gorm:"size:255" json:"category"`
+
+	// Seperate by ","
+	Images *string `gorm:"size:255" json:"images"`
+
+	Location     string `gorm:"size255" json:"location"`
+	Position     string `gorm:"size:255" json:"position"`
+	SalaryMin    string `json:"start_salary"`
+	SalaryMax    string `json:"end_salary"`
+	StudentLevel string `gorm:"size:255" json:"student_level"`
+
+	// Two column types will be to string
+	WorkingHoursMin string `json:"working_hours_start"`
+	WorkingHoursMax string `json:"working_hours_end"`
+
+	PaidVacation     uint   `json:"paid_vacation"`
+	AnnualLeave      uint   `json:"annual_leave"`
+	Severance        string `gorm:"size:255" json:"severance"`
+	Insurance        string `gorm:"size:255" json:"insurance"`
+	Housing          string `gorm:"size:255" json:"housing"`
+	HousingAllowance string `gorm:"size:255" json:"housing_allowance"`
+	Rank             int    `gorm:"size:1" json:"rank"`
+
+	UserID uint
+	User   User `gorm:"ForeignKey:UserID;References:ID"`
 }
 
 type PartyAndEvents struct {

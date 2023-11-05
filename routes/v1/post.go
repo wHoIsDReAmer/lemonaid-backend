@@ -29,7 +29,7 @@ func GetJobPosts(c *fiber.Ctx) error {
 }
 
 func WriteJobPost(c *fiber.Ctx) error {
-	var body db.JobPost
+	var body db.PendingJobPost
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
@@ -44,13 +44,10 @@ func WriteJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	_body := db.PendingJobPost{}
-	_body.JobPost = body
-
-	db.DB.Create(&_body)
+	db.DB.Create(&body)
 
 	return c.JSON(fiber.Map{
-		"id": _body.ID,
+		"id":      body.ID,
 		"status":  fiber.StatusOK,
 		"message": "A pending post has been created. Please wait for administrator to confirm.",
 	})
@@ -226,7 +223,7 @@ func WriteTour(c *fiber.Ctx) error {
 	db.DB.Create(&body)
 
 	return c.JSON(fiber.Map{
-		"id": body.ID,
+		"id":      body.ID,
 		"status":  fiber.StatusOK,
 		"message": "Successfully created",
 	})
@@ -334,7 +331,7 @@ func WritePartyAndEvents(c *fiber.Ctx) error {
 	db.DB.Create(&body)
 
 	return c.JSON(fiber.Map{
-		"id": body.ID,
+		"id":      body.ID,
 		"status":  fiber.StatusOK,
 		"message": "Successfully created",
 	})
@@ -451,7 +448,7 @@ func UploadImageToJobPost(c *fiber.Ctx) error {
 			customutils.ImageProcessing(buffer, 70, fileName)
 		}()
 	}
-	
+
 	result := db.DB.Model(&data).
 		Where("id = ?", id).
 		Update("images", strings.Join(fileNames, ","))
@@ -488,7 +485,7 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	postType := form.Value["post_type"]
 
 	images := form.File["images"]
-	
+
 	fmt.Println(len(images))
 
 	if id == nil || postType == nil || len(images) > 4 || len(images) == 0 {
@@ -523,7 +520,7 @@ func UploadImageToPost(c *fiber.Ctx) error {
 		data = db.PartyAndEvents{}
 	}
 
-	fileNames := []string {}
+	fileNames := []string{}
 
 	for _, value := range images {
 		//os.MkdirAll("./public/contents", 0777)
