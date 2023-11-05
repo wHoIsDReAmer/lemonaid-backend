@@ -99,6 +99,7 @@ type JobPost struct {
 }
 
 type PendingJobPost struct {
+	gorm.Model
 	JobPost
 }
 
