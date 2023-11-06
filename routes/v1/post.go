@@ -429,7 +429,7 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 
 	var data db.PendingJobPost
 
-	fileNames := make([]string, 1)
+	var fileNames []string
 
 	for _, value := range images {
 		//os.MkdirAll("./public/contents", 0777)
@@ -490,7 +490,7 @@ func UploadImageToJobPost(c *fiber.Ctx) error {
 
 	var data db.JobPost
 
-	fileNames := make([]string, 1)
+	var fileNames []string
 
 	for _, value := range images {
 		//os.MkdirAll("./public/contents", 0777)
