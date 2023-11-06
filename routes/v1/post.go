@@ -45,6 +45,8 @@ func WriteJobPost(c *fiber.Ctx) error {
 		})
 	}
 
+	body.UserID = c.Locals("user_id").(uint)
+
 	db.DB.Create(&body)
 
 	return c.JSON(fiber.Map{
@@ -500,9 +502,7 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	postType := form.Value["post_type"]
 
 	images := form.File["images"]
-
-	fmt.Println(len(images))
-
+	
 	if id == nil || postType == nil || len(images) > 4 || len(images) == 0 {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{

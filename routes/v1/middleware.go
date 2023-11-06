@@ -9,7 +9,7 @@ func authMiddleWare(c *fiber.Ctx) error {
 	token := c.Get(fiber.HeaderAuthorization, "")
 
 	var session db.Session
-	if rst := db.DB.Select("email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {
+	if rst := db.DB.Select("user_id, email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusUnauthorized,
 			"message": "Unauthorized",
@@ -17,6 +17,7 @@ func authMiddleWare(c *fiber.Ctx) error {
 	}
 
 	c.Locals("email", session.Email)
+	c.Locals("user_id", session.UserID)
 	return c.Next()
 }
 
@@ -24,7 +25,7 @@ func adminMiddleWare(c *fiber.Ctx) error {
 	token := c.Get(fiber.HeaderAuthorization, "")
 
 	var session db.Session
-	if rst := db.DB.Select("email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {
+	if rst := db.DB.Select("user_id, email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusUnauthorized,
 			"message": "Unauthorized",
@@ -32,6 +33,8 @@ func adminMiddleWare(c *fiber.Ctx) error {
 	}
 
 	c.Locals("email", session.Email)
+	c.Locals("user_id", session.UserID)
+
 	email := c.Locals("email")
 
 	var user db.User

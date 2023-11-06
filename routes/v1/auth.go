@@ -31,7 +31,7 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	var user db.User
-	result := db.DB.Select("email, user_accepted", "password", "salt").Where("email = ?", body.Email).Find(&user)
+	result := db.DB.Select("id, email, user_accepted, password, salt").Where("email = ?", body.Email).Find(&user)
 
 	if result.RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -66,7 +66,10 @@ func Login(c *fiber.Ctx) error {
 	sess := new(db.Session)
 	db.DB.Where("email = ?", body.Email).FirstOrInit(sess)
 
+	fmt.Println(user.ID)
+
 	sess.Uuid = _uuid.String()
+	sess.UserID = user.ID
 	sess.Email = body.Email
 	sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
 
