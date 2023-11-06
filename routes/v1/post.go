@@ -9,6 +9,7 @@ import (
 	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
 	"path/filepath"
+	"reflect"
 	"strings"
 )
 
@@ -159,8 +160,22 @@ func AcceptPendingJobPost(c *fiber.Ctx) error {
 	db.DB.Where("id in (?)", body.Id).
 		Find(&columns)
 
+	var jobPost db.JobPost
+
 	for _, value := range columns {
-		db.DB.Create(&value.JobPost)
+		srcVal := reflect.ValueOf(&value).Elem()
+		dstVal := reflect.ValueOf(&jobPost).Elem()
+
+		for i := 0; i < srcVal.NumField(); i++ {
+			srcField := srcVal.Field(i)
+			srcTypeField := srcVal.Type().Field(i)
+			dstField := dstVal.FieldByName(srcTypeField.Name)
+
+			if dstField.IsValid() && dstField.Type() == srcField.Type() {
+				dstField.Set(srcField)
+			}
+		}
+		db.DB.Create(&jobPost)
 	}
 
 	go db.DB.Unscoped().Delete(&columns)
