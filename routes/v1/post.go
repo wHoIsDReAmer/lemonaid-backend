@@ -408,6 +408,67 @@ func RemovePartyAndEvents(c *fiber.Ctx) error {
 	})
 }
 
+func UploadImageToPendingJobPost(c *fiber.Ctx) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return fiber.NewError(fiber.StatusBadRequest,
+			"It's incorrect request. "+
+				"multipart form must be provided")
+	}
+
+	id := form.Value["id"]
+	images := form.File["images"]
+
+	if id == nil || len(images) > 4 || len(images) == 0 {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Data is incorrect",
+			})
+	}
+
+	var data db.PendingJobPost
+
+	fileNames := make([]string, 1)
+
+	for _, value := range images {
+		//os.MkdirAll("./public/contents", 0777)
+		fileName := uuid.New().String() + filepath.Ext(value.Filename)
+		fileNames = append(fileNames, "./contents/"+fileName)
+
+		go func() {
+			file, _ := value.Open()
+			defer file.Close()
+
+			buffer, err := io.ReadAll(file)
+
+			if err != nil {
+				fmt.Println("Error occurs while image writing..")
+				return
+			}
+
+			customutils.ImageProcessing(buffer, 70, fileName)
+		}()
+	}
+
+	result := db.DB.Model(&data).
+		Where("id = ?", id).
+		Update("images", strings.Join(fileNames, ","))
+
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotAcceptable).
+			JSON(fiber.Map{
+				"status":  fiber.StatusNotAcceptable,
+				"message": "Cannot find post id",
+			})
+	}
+
+	return c.JSON(fiber.Map{
+		"status":  fiber.StatusOK,
+		"message": "Successfully upload images",
+	})
+}
+
 func UploadImageToJobPost(c *fiber.Ctx) error {
 	form, err := c.MultipartForm()
 	if err != nil {

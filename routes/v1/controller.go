@@ -53,6 +53,9 @@ func Controller(app *fiber.App) {
 	app.Use("/api/v1/post/job_images_upload", authMiddleWare)
 	app.Post("/api/v1/post/job_images_upload", UploadImageToJobPost)
 
+	app.Use("/api/v1/post/pending_job_images_upload", authMiddleWare)
+	app.Post("/api/v1/post/pending_job_images_upload", UploadImageToPendingJobPost)
+
 	app.Use("/api/v1/post/images_upload", adminMiddleWare)
 	app.Post("/api/v1/post/images_upload", UploadImageToPost)
 

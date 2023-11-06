@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	dotenv.Load(".env")
+	dotenv.Load(".env")	
 
 	//v1.SendMail("lcw060403@gmail.com", "hello world", "helo world", "heihg")
 
