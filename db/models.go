@@ -94,8 +94,8 @@ type JobPost struct {
 	HousingAllowance string `gorm:"size:255" json:"housing_allowance"`
 	Rank             int    `gorm:"size:1" json:"rank"`
 
-	UserID uint
-	User   User `gorm:"ForeignKey:UserID;References:ID"`
+	UserID uint `json:"user_id"`
+	User   User `gorm:"ForeignKey:UserID;References:ID" json:"-"`
 }
 
 type PendingJobPost struct {
@@ -124,8 +124,8 @@ type Session struct {
 	Email string `gorm:"size:255;unique"`
 	Uuid  string `gorm:"size:36"`
 
-	UserID uint
-	User   User `gorm:"ForeignKey:UserID;References:ID"`
+	UserID uint `json:"user_id"`
+	User   User `gorm:"ForeignKey:UserID;References:ID" json:"-"`
 
 	Expires time.Time `gorm:"type:time"`
 }
@@ -134,6 +134,6 @@ type ApplyJobPost struct {
 	gorm.Model
 	JobPostID uint
 	JobPost   JobPost `gorm:"ForeignKey:JobPostID;References:ID"`
-	UserID    uint
-	User      User `gorm:"ForeignKey:UserID;References:ID"`
+	UserID    uint    `json:"user_id"`
+	User      User    `gorm:"ForeignKey:UserID;References:ID" json:"-"`
 }

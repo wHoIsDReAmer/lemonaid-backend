@@ -66,8 +66,6 @@ func Login(c *fiber.Ctx) error {
 	sess := new(db.Session)
 	db.DB.Where("email = ?", body.Email).FirstOrInit(sess)
 
-	fmt.Println(user.ID)
-
 	sess.Uuid = _uuid.String()
 	sess.UserID = user.ID
 	sess.Email = body.Email
