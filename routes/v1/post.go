@@ -437,7 +437,7 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 		fileName := uuid.New().String() + filepath.Ext(value.Filename)
 		fileNames = append(fileNames, "./contents/"+fileName)
 
-		go func() {
+		go func(value *multipart.FileHeader) {
 			file, _ := value.Open()
 			defer file.Close()
 
@@ -449,7 +449,7 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 			}
 
 			customutils.ImageProcessing(buffer, 70, fileName)
-		}()
+		}(value)
 	}
 
 	result := db.DB.Model(&data).
