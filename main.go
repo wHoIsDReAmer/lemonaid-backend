@@ -21,6 +21,7 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
+		BodyLimit: 20 * 1024 * 1024,
 	})
 
 	if os.Getenv("DEV") == "true" {
