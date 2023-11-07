@@ -92,7 +92,7 @@ type JobPost struct {
 	Insurance        string `gorm:"size:255" json:"insurance"`
 	Housing          string `gorm:"size:255" json:"housing"`
 	HousingAllowance string `gorm:"size:255" json:"housing_allowance"`
-	Rank             int    `gorm:"size:1" json:"rank"`
+	Rank  	           int    `gorm:"size:1" json:"rank"`
 
 	UserID uint `json:"user_id"`
 	User   User `gorm:"ForeignKey:UserID;References:ID" json:"-"`

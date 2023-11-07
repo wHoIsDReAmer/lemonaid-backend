@@ -3,7 +3,7 @@ module lemonaid-backend
 go 1.21.1
 
 require (
-	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/gofiber/fiber/v2 v2.50.0
 	github.com/google/uuid v1.3.1
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.4
