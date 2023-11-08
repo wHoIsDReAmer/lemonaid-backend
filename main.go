@@ -7,21 +7,21 @@ import (
 	"lemonaid-backend/db"
 	"lemonaid-backend/dotenv"
 	v1 "lemonaid-backend/routes/v1"
+	"lemonaid-backend/routes/v1/oauth"
 	"os"
 )
 
 func main() {
-	dotenv.Load(".env")	
-
-	//v1.SendMail("lcw060403@gmail.com", "hello world", "helo world", "heihg")
+	dotenv.Load(".env")
+	oauth.OAuthSetting()
 
 	var port = os.Getenv("PORT")
 
 	db.Init() // init the db
 
 	app := fiber.New(fiber.Config{
-		DisableStartupMessage: true,	
-		BodyLimit: 30 * 1024 * 1024,
+		DisableStartupMessage: true,
+		BodyLimit:             30 * 1024 * 1024,
 	})
 
 	if os.Getenv("DEV") == "true" {

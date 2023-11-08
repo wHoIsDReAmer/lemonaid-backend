@@ -2,7 +2,10 @@ package oauth
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"lemonaid-backend/db"
+	"os"
 )
 
 func GetOAuthProcessInfo(c *fiber.Ctx) error {
@@ -27,4 +30,14 @@ func GetOAuthProcessInfo(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"email": session.Email,
 	})
+}
+
+func OAuthSetting() {
+	googleOAuthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("GOOGLE_OAUTH_CID"),
+		ClientSecret: os.Getenv("GOOGLE_OAUTH_SECRET"),
+		RedirectURL:  os.Getenv("GOOGLE_OAUTH_REDIRECT_URI"),
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
 }

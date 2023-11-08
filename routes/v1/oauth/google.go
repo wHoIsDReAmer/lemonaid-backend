@@ -8,24 +8,16 @@ import (
 	"github.com/gofiber/session/v2"
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"lemonaid-backend/db"
 	"net/http"
-	"os"
 	"time"
 )
 
 var (
-	oauthConf = &oauth2.Config{
-		ClientID:     os.Getenv("GOOGLE_OAUTH_CID"),
-		ClientSecret: os.Getenv("GOOGLE_OAUTH_SECRET"),
-		RedirectURL:  os.Getenv("GOOGLE_OAUTH_REDIRECT_URI"),
-		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
-		Endpoint:     google.Endpoint,
-	}
 	// 세션 스토어 생성
-	store = session.New()
+	googleOAuthConfig *oauth2.Config
+	store             = session.New()
 )
 
 func GoogleLogin(c *fiber.Ctx) error {
@@ -48,7 +40,7 @@ func GoogleLogin(c *fiber.Ctx) error {
 	}
 
 	// Google 로그인 페이지로 리디렉션
-	return c.Redirect(oauthConf.AuthCodeURL(state))
+	return c.Redirect(googleOAuthConfig.AuthCodeURL(state))
 }
 
 func GoogleCallback(c *fiber.Ctx) error {
@@ -62,7 +54,7 @@ func GoogleCallback(c *fiber.Ctx) error {
 
 	// 인증 코드 교환
 	code := c.Query("code")
-	token, err := oauthConf.Exchange(c.UserContext(), code)
+	token, err := googleOAuthConfig.Exchange(c.UserContext(), code)
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
