@@ -5,23 +5,30 @@ import (
 	"encoding/base64"
 	json2 "encoding/json"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/session/v2"
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"io/ioutil"
 	"lemonaid-backend/db"
 	"net/http"
+	"os"
 	"time"
 )
 
 var (
-	// 세션 스토어 생성
+	// Auth Config
 	googleOAuthConfig *oauth2.Config
-	store             = session.New()
 )
 
 func GoogleLogin(c *fiber.Ctx) error {
-	// 세션 가져오기
+	googleOAuthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("GOOGLE_OAUTH_CID"),
+		ClientSecret: os.Getenv("GOOGLE_OAUTH_SECRET"),
+		RedirectURL:  os.Getenv("GOOGLE_OAUTH_REDIRECT_URI"),
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
+
 	sess := store.Get(c)
 
 	// 상태 문자열 생성
@@ -46,20 +53,18 @@ func GoogleLogin(c *fiber.Ctx) error {
 func GoogleCallback(c *fiber.Ctx) error {
 	sess := store.Get(c)
 
-	// 쿼리에서 상태 확인
 	state := c.Query("state")
 	if sess.Get("state") != state {
 		return fiber.ErrUnauthorized
 	}
 
-	// 인증 코드 교환
 	code := c.Query("code")
 	token, err := googleOAuthConfig.Exchange(c.UserContext(), code)
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
 
-	return oAuthProcessing(c, token)
+	return GoAuthProcessing(c, token)
 }
 
 type Error struct{}
@@ -68,14 +73,14 @@ func (e *Error) Error() string {
 	return "Error occurs while logining oauth.."
 }
 
-type OAuthInfo struct {
+type GoogleOAuthInfo struct {
 	Id            string `json:"id"`
 	Email         string `json:"email"`
 	VerifiedEmail bool   `json:"verified_email"`
 	Picture       string `json:"picture"`
 }
 
-func oAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
+func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 	request, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v2/userinfo", nil)
 	if err != nil {
 		return c.Send([]byte("Maybe error occurs while logining.."))
@@ -95,11 +100,17 @@ func oAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return &Error{}
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status": fiber.StatusBadRequest,
+			})
 	}
 
-	var oauthInfo OAuthInfo
-	json2.Unmarshal(body, &oauthInfo)
+	var oauthInfo GoogleOAuthInfo
+	err = json2.Unmarshal(body, &oauthInfo)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
 
 	var user db.User
 	db.DB.

@@ -7,13 +7,11 @@ import (
 	"lemonaid-backend/db"
 	"lemonaid-backend/dotenv"
 	v1 "lemonaid-backend/routes/v1"
-	"lemonaid-backend/routes/v1/oauth"
 	"os"
 )
 
 func main() {
 	dotenv.Load(".env")
-	oauth.OAuthSetting()
 
 	var port = os.Getenv("PORT")
 
