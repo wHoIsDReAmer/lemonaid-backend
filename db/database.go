@@ -21,6 +21,13 @@ func Init() {
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
+	sqlDB, err := DB.DB()
+	if err != nil {
+		fmt.Println("Failed to get database instance: ", err)
+		return
+	}
+	sqlDB.SetMaxOpenConns(1)
+
 	if err != nil {
 		fmt.Println("Failed connect to database: ", err)
 		return
