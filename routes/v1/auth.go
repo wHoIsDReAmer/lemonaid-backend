@@ -254,7 +254,7 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	c.ClearCookie("lsession")
-	go db.DB.
+	db.DB.
 		Where("email = ?", email[0]).
 		Delete(&db.Session{})
 
