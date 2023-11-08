@@ -23,7 +23,9 @@ func main() {
 	})
 
 	if os.Getenv("DEV") == "true" {
-		app.Use(cors.New())
+		app.Use(cors.New(cors.Config{
+			ExposeHeaders: "Content-Disposition",
+		}))
 	}
 
 	v1.Controller(app)
