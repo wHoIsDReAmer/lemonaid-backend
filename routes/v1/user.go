@@ -26,7 +26,7 @@ func Me(c *fiber.Ctx) error {
 }
 
 type Teacher struct {
-	Id          unt       `json:"id"`
+	Id          uint      `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
 	Email       string    `json:"email"`
