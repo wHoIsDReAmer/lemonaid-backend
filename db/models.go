@@ -134,7 +134,7 @@ type Session struct {
 type ApplyJobPost struct {
 	gorm.Model
 	JobPostID uint
-	JobPost   JobPost `gorm:"ForeignKey:JobPostID;References:ID"`
+	JobPost   JobPost `gorm:"ForeignKey:JobPostID;References:ID" json:"-"`
 	UserID    uint    `json:"user_id"`
 	User      User    `gorm:"ForeignKey:UserID;References:ID" json:"-"`
 }

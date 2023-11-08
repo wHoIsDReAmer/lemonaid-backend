@@ -64,7 +64,7 @@ func Controller(app *fiber.App) {
 	app.Post("/api/v1/auth/logout", Logout)
 
 	app.Use("/api/v1/user/teachers", authMiddleWare)
-	app.Post("/api/v1/user/teachers", Teachers)
+	app.Get("/api/v1/user/teachers", Teachers)
 
 	app.Use("/api/v1/user/me", authMiddleWare)
 	app.Get("/api/v1/user/me", Me)
@@ -78,7 +78,7 @@ func Controller(app *fiber.App) {
 	app.Put("/api/v1/auth/approval_user", AcceptUser)
 	app.Delete("/api/v1/auth/approval_user", DenyUser)
 
-	app.Use("/api/v1/search/search_posts_and_teachers", authMiddleWare)
+	//app.Use("/api/v1/search/search_posts_and_teachers", authMiddleWare)
 	app.Get("/api/v1/search/search_posts_and_teachers", SearchPostAndTeachers)
 
 	app.Get("/api/v1/oauth/google/login", oauth.GoogleLogin)

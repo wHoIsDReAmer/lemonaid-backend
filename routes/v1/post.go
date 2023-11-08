@@ -146,11 +146,12 @@ func GetPendingJobPosts(c *fiber.Ctx) error {
 }
 
 type PendingJobPostBody struct {
-	Id []uint `json:"id"`
+	Id   uint `json:"id"`
+	Rank int  `json:"rank"`
 }
 
 func AcceptPendingJobPost(c *fiber.Ctx) error {
-	var body PendingJobPostBody
+	var body []PendingJobPostBody
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
@@ -158,11 +159,28 @@ func AcceptPendingJobPost(c *fiber.Ctx) error {
 		})
 	}
 
+	var ids = make([]uint, len(body))
+	for i, value := range body {
+		ids[i] = value.Id
+	}
+
 	var columns []db.PendingJobPost
-	db.DB.Where("id in (?)", body.Id).
+	db.DB.Where("id in (?)", ids).
 		Find(&columns)
 
 	for _, value := range columns {
+		var rank int
+
+		for _, jobPost := range body {
+			if jobPost.Id == value.ID {
+				if jobPost.Rank >= 1 && jobPost.Rank <= 3 {
+					rank = jobPost.Rank
+				}
+				break
+			}
+		}
+
+		value.JobPost.Rank = rank
 		db.DB.Create(&value.JobPost)
 	}
 
@@ -174,8 +192,12 @@ func AcceptPendingJobPost(c *fiber.Ctx) error {
 	})
 }
 
+type PendingDenyJobPostBody struct {
+	Id []uint `json:"id"`
+}
+
 func DenyPendingJobPost(c *fiber.Ctx) error {
-	var body PendingJobPostBody
+	var body PendingDenyJobPostBody
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
@@ -444,7 +466,7 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 			buffer, err := io.ReadAll(file)
 
 			if err != nil {
-				fmt.Println("Error occurs while image writing..")	
+				fmt.Println("Error occurs while image writing..")
 				return
 			}
 
