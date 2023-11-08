@@ -193,11 +193,12 @@ func Register(c *fiber.Ctx) error {
 	if oauthSession != "" {
 		var sess db.Session
 		db.DB.
-			Select("o_authing").
+			Select("email, o_authing").
 			Where("uuid = ?", oauthSession).
 			Find(&sess)
 
 		if sess.OAuthing == 1 {
+			user.Email = sess.Email
 			user.Password = "oauth"
 		}
 	}
