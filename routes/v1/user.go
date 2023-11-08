@@ -37,7 +37,7 @@ func Teachers(c *fiber.Ctx) error {
 	var users []db.User
 	db.DB.
 		Select("id, first_name, last_name, email, phone_number, birthday, gender, nationality, image").
-		Where("user_type = ?", "2").
+		Where("user_type = ? and resume is not null", "2").
 		Find(&users)
 
 	return c.JSON(fiber.Map{
