@@ -38,7 +38,7 @@ func Teachers(c *fiber.Ctx) error {
 
 	var users []db.User
 	db.DB.
-		Select("id, first_name, last_name, email, phone_number, birthday, gender, nationality, image").
+		Select("id, first_name, last_name, email, phone_number, birthday, gender, occupation, nationality, image").
 		Where("user_type = ? and resume is not null", "2").
 		Find(&users)
 
@@ -93,7 +93,8 @@ func ResumeDownload(c *fiber.Ctx) error {
 			})
 	}
 
-	c.Attachment(strings.Replace(uuid.NewString(), "-", "", -1) + _user.ResumeExt)
+	//c.Attachment(strings.Replace(uuid.NewString(), "-", "", -1) + _user.ResumeExt)
+	c.Set("Content-Disposition", "attachment; filename="+strings.Replace(uuid.NewString(), "-", "", -1)+_user.ResumeExt) // 'filename.ext'를 원하는 파일 이름으로 변경하세요.
 
 	return c.Send(*_user.Resume)
 }
