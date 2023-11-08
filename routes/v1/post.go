@@ -444,7 +444,7 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 			buffer, err := io.ReadAll(file)
 
 			if err != nil {
-				fmt.Println("Error occurs while image writing..")
+				fmt.Println("Error occurs while image writing..")	
 				return
 			}
 

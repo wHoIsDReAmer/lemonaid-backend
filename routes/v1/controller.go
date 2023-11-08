@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"lemonaid-backend/routes/v1/oauth"
 	"time"
 )
 
@@ -79,4 +80,9 @@ func Controller(app *fiber.App) {
 
 	app.Use("/api/v1/search/search_posts_and_teachers", authMiddleWare)
 	app.Get("/api/v1/search/search_posts_and_teachers", SearchPostAndTeachers)
+
+	app.Get("/api/v1/oauth/google/login", oauth.GoogleLogin)
+	app.Get("/api/v1/oauth/google", oauth.GoogleCallback)
+
+	app.Get("/api/v1/oauth/oauth_processing", oauth.GetOAuthProcessInfo)
 }

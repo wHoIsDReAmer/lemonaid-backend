@@ -61,7 +61,7 @@ type Tour struct {
 	Company     string `gorm:"size:255" json:"company"`
 	Theme       string `gorm:"size:255" json:"theme"`
 	Location    string `gorm:"size:255" json:"location"`
-	Date        string `gorm:"type:date" json:"date"`
+	Date        string `gorm:"size:255" json:"date"`
 	Price       uint   `json:"price"`
 	Itinerary   string `gorm:"type:text" json:"itinerary"`
 }
@@ -70,7 +70,7 @@ type JobPost struct {
 	gorm.Model
 
 	Academy  string `gorm:"size:255" json:"academy"`
-	Campus   string `gorm:"size:255" json:"campus"`
+	Campus   string `gorm:"size:255" json:"camp	us"`
 	Category string `gorm:"size:255" json:"category"`
 
 	// Seperate by ","
@@ -92,7 +92,7 @@ type JobPost struct {
 	Insurance        string `gorm:"size:255" json:"insurance"`
 	Housing          string `gorm:"size:255" json:"housing"`
 	HousingAllowance string `gorm:"size:255" json:"housing_allowance"`
-	Rank  	           int    `gorm:"size:1" json:"rank"`
+	Rank             int    `gorm:"size:1" json:"rank"`
 
 	UserID uint `json:"user_id"`
 	User   User `gorm:"ForeignKey:UserID;References:ID" json:"-"`
@@ -114,7 +114,7 @@ type PartyAndEvents struct {
 	Company     string `gorm:"size:255" json:"company"`
 	Theme       string `gorm:"size:255" json:"theme"`
 	Location    string `gorm:"size:255" json:"location"`
-	Date        string `gorm:"type:date" json:"date"`
+	Date        string `gorm:"size:255" json:"date"`
 	Price       uint   `json:"price"`
 	Itinerary   string `gorm:"type:text" json:"itinerary"`
 }
@@ -124,8 +124,9 @@ type Session struct {
 	Email string `gorm:"size:255;unique"`
 	Uuid  string `gorm:"size:36"`
 
-	UserID uint `json:"user_id"`
-	User   User `gorm:"ForeignKey:UserID;References:ID" json:"-"`
+	UserID uint
+
+	OAuthing int8 `json:"oauthing"`
 
 	Expires time.Time `gorm:"type:time"`
 }

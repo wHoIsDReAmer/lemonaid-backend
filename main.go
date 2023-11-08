@@ -20,8 +20,8 @@ func main() {
 	db.Init() // init the db
 
 	app := fiber.New(fiber.Config{
-		DisableStartupMessage: true,
-		BodyLimit: 20 * 1024 * 1024,
+		DisableStartupMessage: true,	
+		BodyLimit: 30 * 1024 * 1024,
 	})
 
 	if os.Getenv("DEV") == "true" {

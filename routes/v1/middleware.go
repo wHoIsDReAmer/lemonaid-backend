@@ -7,9 +7,12 @@ import (
 
 func authMiddleWare(c *fiber.Ctx) error {
 	token := c.Get(fiber.HeaderAuthorization, "")
+	if token == "" {
+		token = c.Cookies("lsession", "")
+	}
 
 	var session db.Session
-	if rst := db.DB.Select("user_id, email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {
+	if rst := db.DB.Select("user_id, email").Where("uuid = ? and o_authing = 0", token).Find(&session); rst.RowsAffected == 0 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusUnauthorized,
 			"message": "Unauthorized",
@@ -23,6 +26,9 @@ func authMiddleWare(c *fiber.Ctx) error {
 
 func adminMiddleWare(c *fiber.Ctx) error {
 	token := c.Get(fiber.HeaderAuthorization, "")
+	if token == "" {
+		token = c.Cookies("lsession", "")
+	}
 
 	var session db.Session
 	if rst := db.DB.Select("user_id, email").Where("uuid = ?", token).Find(&session); rst.RowsAffected == 0 {

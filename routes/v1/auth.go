@@ -159,11 +159,6 @@ func Register(c *fiber.Ctx) error {
 			}
 
 			customutils.ImageProcessing(buffer, 70, filename)
-
-			//os.MkdirAll("./public/contents", 0777)
-			//
-			//dst, _ := os.Create("./public/contents/" + hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename))
-			//defer dst.Close()
 		}()
 	}
 
@@ -193,6 +188,19 @@ func Register(c *fiber.Ctx) error {
 	hasher := sha256.New()
 	hasher.Write([]byte(password[0] + user.Salt))
 	user.Password = hex.EncodeToString(hasher.Sum(nil))
+
+	oauthSession := c.Cookies("lsession", "")
+	if oauthSession != "" {
+		var sess db.Session
+		db.DB.
+			Select("o_authing").
+			Where("uuid = ?", oauthSession).
+			Find(&sess)
+
+		if sess.OAuthing == 1 {
+			user.Password = "oauth"
+		}
+	}
 
 	user.PhoneNumber = phoneNumber[0]
 	user.Image = imagePath
@@ -243,6 +251,11 @@ func Register(c *fiber.Ctx) error {
 	} else {
 		user.VideoMessengerID = &videoMessengerId[0]
 	}
+
+	c.ClearCookie("lsession")
+	go db.DB.
+		Where("email = ?", email[0]).
+		Delete(&db.Session{})
 
 	go db.DB.Create(&user)
 
