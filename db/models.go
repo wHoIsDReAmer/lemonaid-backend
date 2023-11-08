@@ -21,7 +21,7 @@ const (
 )
 
 type User struct {
-	gorm.Model  `json:"-"`
+	gorm.Model
 	FirstName   string    `gorm:"size:255" json:"first_name"`
 	LastName    string    `gorm:"size:255" json:"last_name"`
 	Email       string    `gorm:"size:320;unique" json:"email"`
