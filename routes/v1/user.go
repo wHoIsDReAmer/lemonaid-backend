@@ -108,7 +108,7 @@ func ResumeDownload(c *fiber.Ctx) error {
 	userId := c.Query("user_id", "0")
 
 	var _user db.User
-	if rst := db.DB.Select("resume").
+	if rst := db.DB.Select("resume, resume_ext").
 		Where("id = ?", userId).
 		Find(&_user); rst.RowsAffected == 0 {
 		return c.Status(fiber.StatusBadRequest).
