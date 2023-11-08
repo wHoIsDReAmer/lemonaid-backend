@@ -7,8 +7,10 @@ import (
 	"github.com/google/uuid"
 	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
+	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func Me(c *fiber.Ctx) error {
@@ -21,6 +23,19 @@ func Me(c *fiber.Ctx) error {
 		"status": fiber.StatusOK,
 		"data":   user,
 	})
+}
+
+type Teacher struct {
+	Id          int       `json:"id"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Email       string    `json:"email"`
+	PhoneNumber string    `json:"phone_number"`
+	Birthday    time.Time `json:"birthday"`
+	Gender      *string   `json:"gender"`
+	Occupation  *string   `json:"occupation"`
+	Nationality *string   `json:"nationality"`
+	Image       *string   `json:"image_path"`
 }
 
 func Teachers(c *fiber.Ctx) error {
@@ -42,14 +57,38 @@ func Teachers(c *fiber.Ctx) error {
 		Where("user_type = ? and resume is not null", "2").
 		Find(&users)
 
+	var teachers = make([]Teacher, len(users))
+
+	for idx, user := range users {
+		s2 := teachers[idx]
+
+		v1 := reflect.ValueOf(user)
+		v2 := reflect.ValueOf(&s2).Elem()
+
+		t1 := v1.Type()
+		t2 := v2.Type()
+
+		for i := 0; i < t1.NumField(); i++ {
+			field1 := t1.Field(i)
+			jsonTag1 := field1.Tag.Get("json")
+
+			for j := 0; j < t2.NumField(); j++ {
+				field2 := t2.Field(j)
+				jsonTag2 := field2.Tag.Get("json")
+
+				if jsonTag1 == jsonTag2 {
+					v2.Field(j).Set(v1.Field(i))
+				}
+			}
+		}
+
+		teachers[idx] = s2
+	}
+
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
-		"data":   users,
+		"data":   teachers,
 	})
-}
-
-type ResumeDownloadBody struct {
-	UserId int `json:"user_id"`
 }
 
 func ResumeDownload(c *fiber.Ctx) error {
@@ -65,18 +104,11 @@ func ResumeDownload(c *fiber.Ctx) error {
 		})
 	}
 
-	var body ResumeDownloadBody
-	if err := c.BodyParser(&body); err != nil {
-		return c.Status(fiber.StatusBadRequest).
-			JSON(fiber.Map{
-				"status":  fiber.StatusBadRequest,
-				"message": "Cannot parse body",
-			})
-	}
+	userId := c.Query("user_id", "0")
 
 	var _user db.User
 	if rst := db.DB.Select("resume").
-		Where("id = ?", body.UserId).
+		Where("id = ?", userId).
 		Find(&_user); rst.RowsAffected == 0 {
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{

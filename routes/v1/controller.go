@@ -67,7 +67,7 @@ func Controller(app *fiber.App) {
 	app.Get("/api/v1/user/teachers", Teachers)
 
 	app.Use("/api/v1/user/resume", authMiddleWare)
-	app.Post("/api/v1/user/resume", ResumeDownload)
+	app.Get("/api/v1/user/resume", ResumeDownload)
 
 	app.Use("/api/v1/user/me", authMiddleWare)
 	app.Get("/api/v1/user/me", Me)
