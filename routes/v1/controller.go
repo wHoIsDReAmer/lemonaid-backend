@@ -66,6 +66,9 @@ func Controller(app *fiber.App) {
 	//app.Use("/api/v1/user/teachers", authMiddleWare)
 	app.Get("/api/v1/user/teachers", Teachers)
 
+	app.Use("/api/v1/user/resume", authMiddleWare)
+	app.Get("/api/v1/user/resume", ResumeDownload)
+
 	app.Use("/api/v1/user/me", authMiddleWare)
 	app.Get("/api/v1/user/me", Me)
 

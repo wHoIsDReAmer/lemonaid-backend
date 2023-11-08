@@ -163,6 +163,7 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	var resumeBlob *[]byte
+	var resumeExt string
 	resume := form.File["resume"]
 	if resume != nil {
 		h := resume[0]
@@ -176,6 +177,7 @@ func Register(c *fiber.Ctx) error {
 		bytes := make([]byte, h.Size)
 		file.Read(bytes)
 		resumeBlob = &bytes
+		resumeExt = filepath.Ext(resume[0].Filename)
 	}
 
 	user := new(db.User)
@@ -206,6 +208,9 @@ func Register(c *fiber.Ctx) error {
 	user.PhoneNumber = phoneNumber[0]
 	user.Image = imagePath
 	user.Resume = resumeBlob
+	user.ResumeExt = resumeExt
+
+	user.UserType, _ = strconv.Atoi(userType[0])
 
 	value, err := time.Parse("2006-01-02", birthday[0])
 	if err != nil {

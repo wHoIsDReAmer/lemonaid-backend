@@ -42,6 +42,7 @@ type User struct {
 	VideoMessenger   *string `gorm:"size:255" json:"video_messenger"`
 	VideoMessengerID *string `gorm:"size:255" json:"video_messenger_id"`
 	Resume           *[]byte `gorm:"type:longblob" json:"resume"`
+	ResumeExt        string  `gorm:"size:10" json:"resume_ext"`
 	Image            *string `gorm:"size:255" json:"image_path"`
 	Plan             int     `gorm:"default:0" json:"plan"`
 

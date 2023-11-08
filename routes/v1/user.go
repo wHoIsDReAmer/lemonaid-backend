@@ -4,9 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
 	"strconv"
+	"strings"
 )
 
 func Me(c *fiber.Ctx) error {
@@ -44,6 +46,56 @@ func Teachers(c *fiber.Ctx) error {
 		"status": fiber.StatusOK,
 		"data":   users,
 	})
+}
+
+type ResumeDownloadBody struct {
+	UserId int `json:"user_id"`
+}
+
+func ResumeDownload(c *fiber.Ctx) error {
+	email := c.Locals("email")
+
+	var user db.User
+	db.DB.Select("plan").Where("email = ?", email).Find(&user)
+
+	if user.Plan != db.RESUME && user.Plan != db.SPECIALIST {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Permission denied",
+		})
+	}
+
+	var body ResumeDownloadBody
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Cannot parse body",
+			})
+	}
+
+	var _user db.User
+	if rst := db.DB.Select("resume").
+		Where("id = ?", body.UserId).
+		Find(&_user); rst.RowsAffected == 0 {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "Cannot find user by id",
+			})
+	}
+
+	if _user.Resume == nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{
+				"status":  fiber.StatusBadRequest,
+				"message": "User hasn't resume",
+			})
+	}
+
+	c.Attachment(strings.Replace(uuid.NewString(), "-", "", -1) + _user.ResumeExt)
+
+	return c.Send(*_user.Resume)
 }
 
 type UserBody struct {
