@@ -22,17 +22,17 @@ func Me(c *fiber.Ctx) error {
 }
 
 func Teachers(c *fiber.Ctx) error {
-	email := c.Locals("email")
+	//email := c.Locals("email")
 
-	var user db.User
-	db.DB.Select("plan").Where("email = ?", email).Find(&user)
-
-	if user.Plan != db.RESUME && user.Plan != db.SPECIALIST {
-		return c.JSON(fiber.Map{
-			"status":  fiber.StatusForbidden,
-			"message": "Permission denied",
-		})
-	}
+	//var user db.User
+	//db.DB.Select("plan").Where("email = ?", email).Find(&user)
+	//
+	//if user.Plan != db.RESUME && user.Plan != db.SPECIALIST {
+	//	return c.JSON(fiber.Map{
+	//		"status":  fiber.StatusForbidden,
+	//		"message": "Permission denied",
+	//	})
+	//}
 
 	var users []db.User
 	db.DB.
