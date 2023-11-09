@@ -19,8 +19,8 @@ func Controller(app *fiber.App) {
 	app.Post("/api/v1/auth/login", Login)
 	app.Post("/api/v1/auth/register", Register)
 
-	app.Use("/api/v1/post/job_post", authMiddleWare)
 	app.Get("/api/v1/post/job_post", GetJobPosts)
+	app.Use("/api/v1/post/job_post", authMiddleWare)
 	app.Post("/api/v1/post/job_post", WriteJobPost)
 	app.Put("/api/v1/post/job_post", UpdateJobPost)
 	app.Delete("/api/v1/post/job_post", RemoveJobPost)
@@ -62,6 +62,9 @@ func Controller(app *fiber.App) {
 
 	app.Use("/api/v1/auth/logout", authMiddleWare)
 	app.Post("/api/v1/auth/logout", Logout)
+
+	app.Use("/api/v1/user/users", adminMiddleWare)
+	app.Get("/api/v1/user/users", Users)
 
 	//app.Use("/api/v1/user/teachers", authMiddleWare)
 	app.Get("/api/v1/user/teachers", Teachers)

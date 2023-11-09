@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"io"
-	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
+	"lemonaid-backend/myutils"
 	"mime/multipart"
 	"path/filepath"
 	"strings"
@@ -137,7 +137,9 @@ func UpdateJobPost(c *fiber.Ctx) error {
 func GetPendingJobPosts(c *fiber.Ctx) error {
 	var queue []db.PendingJobPost
 
-	db.DB.Find(&queue)
+	db.DB.
+		Where("datalength(images) > 0").
+		Find(&queue)
 
 	return c.JSON(fiber.Map{
 		"status": fiber.StatusOK,
@@ -455,6 +457,15 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 	var fileNames []string
 
 	for _, value := range images {
+
+		if !myutils.ImageExtValidation(value.Filename) {
+			return c.Status(fiber.StatusBadRequest).
+				JSON(fiber.Map{
+					"status":  fiber.StatusBadRequest,
+					"message": "Image type is invalid",
+				})
+		}
+
 		//os.MkdirAll("./public/contents", 0777)
 		fileName := uuid.New().String() + filepath.Ext(value.Filename)
 		fileNames = append(fileNames, "./contents/"+fileName)
@@ -470,7 +481,7 @@ func UploadImageToPendingJobPost(c *fiber.Ctx) error {
 				return
 			}
 
-			customutils.ImageProcessing(buffer, 70, fileName)
+			myutils.ImageProcessing(buffer, 70, fileName)
 		}(value)
 	}
 
@@ -516,6 +527,15 @@ func UploadImageToJobPost(c *fiber.Ctx) error {
 	var fileNames []string
 
 	for _, value := range images {
+
+		if !myutils.ImageExtValidation(value.Filename) {
+			return c.Status(fiber.StatusBadRequest).
+				JSON(fiber.Map{
+					"status":  fiber.StatusBadRequest,
+					"message": "Image type is invalid",
+				})
+		}
+
 		//os.MkdirAll("./public/contents", 0777)
 		fileName := uuid.New().String() + filepath.Ext(value.Filename)
 		fileNames = append(fileNames, "./contents/"+fileName)
@@ -531,7 +551,7 @@ func UploadImageToJobPost(c *fiber.Ctx) error {
 				return
 			}
 
-			customutils.ImageProcessing(buffer, 70, fileName)
+			myutils.ImageProcessing(buffer, 70, fileName)
 		}(value)
 	}
 
@@ -607,6 +627,15 @@ func UploadImageToPost(c *fiber.Ctx) error {
 	fileNames := []string{}
 
 	for _, value := range images {
+
+		if !myutils.ImageExtValidation(value.Filename) {
+			return c.Status(fiber.StatusBadRequest).
+				JSON(fiber.Map{
+					"status":  fiber.StatusBadRequest,
+					"message": "Image type is invalid",
+				})
+		}
+
 		//os.MkdirAll("./public/contents", 0777)
 		fileName := uuid.New().String() + filepath.Ext(value.Filename)
 		fileNames = append(fileNames, "./contents/"+fileName)
@@ -622,7 +651,7 @@ func UploadImageToPost(c *fiber.Ctx) error {
 				return
 			}
 
-			customutils.ImageProcessing(buffer, 70, fileName)
+			myutils.ImageProcessing(buffer, 70, fileName)
 		}(value)
 	}
 

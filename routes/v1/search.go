@@ -7,18 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-/*
-	response like
-	response
-
-	{
-		"status": 200,
-		"teachers": []
-		"posts": []
-	}
-
-*/
-
 func SearchPostAndTeachers(c *fiber.Ctx) error {
 	//email := c.Locals("email")
 	name := c.Query("value")

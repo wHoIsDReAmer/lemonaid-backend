@@ -1,26 +1,9 @@
-package customutils
+package myutils
 
 import (
-	"math/rand"
 	"os"
-	"time"
+	"path/filepath"
 )
-
-var (
-	src = rand.NewSource(time.Now().Unix())
-)
-
-func RandI(a int, b int) int {
-	r := rand.New(src)
-
-	return r.Intn(b-a) + a
-}
-
-func RandF(a float64, b float64) float64 {
-	r := rand.New(src)
-
-	return r.Float64()*(b-a) + a
-}
 
 func ImageProcessing(buffer []byte, quality int, filename string) error {
 	//filename := strings.Replace(uuid.New().String(), "-", "", -1) + ".webp"
@@ -52,4 +35,18 @@ func ImageProcessing(buffer []byte, quality int, filename string) error {
 	_, err := dst.Write(buffer)
 
 	return err
+}
+
+func ImageExtValidation(filename string) bool {
+	corrects := []string{".jpeg", ".tiff", ".ai", ".psd", ".gif", ".jpg", ".png"}
+
+	ext := filepath.Ext(filename)
+
+	for _, value := range corrects {
+		if value == ext {
+			return true
+		}
+	}
+
+	return false
 }

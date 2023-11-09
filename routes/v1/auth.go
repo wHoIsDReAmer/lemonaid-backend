@@ -7,8 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"io"
-	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
+	"lemonaid-backend/myutils"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -140,6 +140,14 @@ func Register(c *fiber.Ctx) error {
 	if profile != nil {
 		h := profile[0]
 
+		if !myutils.ImageExtValidation(h.Filename) {
+			return c.Status(fiber.StatusBadRequest).
+				JSON(fiber.Map{
+					"status":  fiber.StatusBadRequest,
+					"message": "Image type is invalid",
+				})
+		}
+
 		filename := hex.EncodeToString([]byte(email[0]+"profile")) + filepath.Ext(h.Filename)
 		path := "./contents/" + filename
 		imagePath = &path
@@ -158,7 +166,7 @@ func Register(c *fiber.Ctx) error {
 				fmt.Println("Error while image writing..")
 			}
 
-			customutils.ImageProcessing(buffer, 70, filename)
+			myutils.ImageProcessing(buffer, 70, filename)
 		}()
 	}
 
@@ -185,7 +193,7 @@ func Register(c *fiber.Ctx) error {
 	user.LastName = lastName[0]
 	user.Email = email[0]
 
-	user.Salt = string(rune(customutils.RandI(10000, 50000)))
+	user.Salt = string(rune(myutils.RandI(10000, 50000)))
 
 	hasher := sha256.New()
 	hasher.Write([]byte(password[0] + user.Salt))

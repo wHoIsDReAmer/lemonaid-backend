@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"lemonaid-backend/customutils"
 	"lemonaid-backend/db"
+	"lemonaid-backend/myutils"
 	"reflect"
 	"strconv"
 	"strings"
@@ -25,7 +25,7 @@ func Me(c *fiber.Ctx) error {
 	})
 }
 
-type Teacher struct {
+type UserResponse struct {
 	Id          uint      `json:"id"`
 	FirstName   string    `json:"first_name"`
 	LastName    string    `json:"last_name"`
@@ -36,6 +36,59 @@ type Teacher struct {
 	Occupation  *string   `json:"occupation"`
 	Nationality *string   `json:"nationality"`
 	Image       *string   `json:"image_path"`
+}
+
+func Users(c *fiber.Ctx) error {
+	//email := c.Locals("email")
+
+	//var user db.User
+	//db.DB.Select("plan").Where("email = ?", email).Find(&user)
+	//
+	//if user.Plan != db.RESUME && user.Plan != db.SPECIALIST {
+	//	return c.JSON(fiber.Map{
+	//		"status":  fiber.StatusForbidden,
+	//		"message": "Permission denied",
+	//	})
+	//}
+
+	var users []db.User
+	db.DB.
+		Select("id, first_name, last_name, email, phone_number, birthday, gender, occupation, nationality, image").
+		Find(&users)
+
+	var _users = make([]UserResponse, len(users))
+
+	for idx, user := range users {
+		s2 := _users[idx]
+
+		v1 := reflect.ValueOf(user)
+		v2 := reflect.ValueOf(&s2).Elem()
+
+		t1 := v1.Type()
+		t2 := v2.Type()
+
+		for i := 0; i < t1.NumField(); i++ {
+			field1 := t1.Field(i)
+			jsonTag1 := field1.Tag.Get("json")
+
+			for j := 0; j < t2.NumField(); j++ {
+				field2 := t2.Field(j)
+				jsonTag2 := field2.Tag.Get("json")
+
+				if jsonTag1 == jsonTag2 {
+					v2.Field(j).Set(v1.Field(i))
+				}
+			}
+		}
+
+		s2.Id = user.ID
+		_users[idx] = s2
+	}
+
+	return c.JSON(fiber.Map{
+		"status": fiber.StatusOK,
+		"data":   _users,
+	})
 }
 
 func Teachers(c *fiber.Ctx) error {
@@ -57,7 +110,7 @@ func Teachers(c *fiber.Ctx) error {
 		Where("user_type = ? and resume is not null", "2").
 		Find(&users)
 
-	var teachers = make([]Teacher, len(users))
+	var teachers = make([]UserResponse, len(users))
 
 	for idx, user := range users {
 		s2 := teachers[idx]
@@ -172,7 +225,7 @@ func UserEdit(c *fiber.Ctx) error {
 			})
 	}
 
-	salt := strconv.Itoa(customutils.RandI(10000, 50000))
+	salt := strconv.Itoa(myutils.RandI(10000, 50000))
 	hasher := sha256.New()
 	hasher.Write([]byte(body.Password + salt))
 
