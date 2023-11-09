@@ -162,7 +162,7 @@ func GetPendingJobPosts(c *fiber.Ctx) error {
 	var queue []db.PendingJobPost
 
 	db.DB.
-		Where("datalength(images) > 0").
+		Where("images is not null").
 		Find(&queue)
 
 	return c.JSON(fiber.Map{

@@ -1,4 +1,4 @@
-package v1
+package myutils
 
 import (
 	"fmt"
@@ -6,10 +6,9 @@ import (
 	"os"
 )
 
-func SendMail(target string, title string, content string, content2 string) {
+func SendMail(to string, title string, content string, content2 string) {
 	from := os.Getenv("EMAIL")
 	pass := os.Getenv("EMAIL_PW")
-	to := "lcw060403@gmail.com"
 
 	auth := smtp.PlainAuth("", from, pass, "smtp.gmail.com")
 
