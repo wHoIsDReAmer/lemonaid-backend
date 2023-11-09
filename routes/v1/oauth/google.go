@@ -164,5 +164,5 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 
 	c.Cookie(cookie)
 
-	return c.Redirect("/oauth/sign-up")
+	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }

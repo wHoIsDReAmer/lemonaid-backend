@@ -190,5 +190,5 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 
 	c.Cookie(cookie)
 
-	return c.Redirect("/oauth/sign-up")
+	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }
