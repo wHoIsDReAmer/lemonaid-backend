@@ -140,6 +140,9 @@ func UpdateJobPost(c *fiber.Ctx) error {
 		Where("id = ?", body.Id).
 		Find(&post)
 
+	body.JobPost.UpdatedAt = post.UpdatedAt
+	body.JobPost.CreatedAt = post.CreatedAt
+
 	post = body.JobPost
 	post.ID = *body.Id
 
@@ -301,6 +304,9 @@ func UpdateTour(c *fiber.Ctx) error {
 		Where("id = ?", body.Id).
 		Find(&tour)
 
+	body.Tour.UpdatedAt = tour.UpdatedAt
+	body.Tour.CreatedAt = tour.CreatedAt
+
 	tour = body.Tour
 	tour.ID = *body.Id
 
@@ -409,6 +415,9 @@ func UpdatePartyAndEvents(c *fiber.Ctx) error {
 	res := db.DB.
 		Where("id = ?", body.Id).
 		Find(&partyAndEvents)
+
+	body.PartyAndEvents.UpdatedAt = partyAndEvents.UpdatedAt
+	body.PartyAndEvents.CreatedAt = partyAndEvents.CreatedAt
 
 	partyAndEvents = body.PartyAndEvents
 	partyAndEvents.ID = *body.Id
