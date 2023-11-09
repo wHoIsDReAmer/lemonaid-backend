@@ -74,6 +74,8 @@ type JobPost struct {
 	Campus   string `gorm:"size:255" json:"camp	us"`
 	Category string `gorm:"size:255" json:"category"`
 
+	EmployeeCount uint `json:"-"`
+
 	// Seperate by ","
 	Images *string `gorm:"size:255" json:"images"`
 

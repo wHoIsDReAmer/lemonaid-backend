@@ -10,6 +10,7 @@ import (
 	"lemonaid-backend/myutils"
 	"mime/multipart"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -26,6 +27,29 @@ func GetJobPosts(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"status": 200,
 		"data":   posts,
+	})
+}
+
+func GetPopularJobPosts(c *fiber.Ctx) error {
+	count := c.Query("count")
+
+	var parsedCount int
+	var err error
+	if parsedCount, err = strconv.Atoi(count); err != nil || parsedCount <= 0 || parsedCount > 99 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  fiber.StatusBadRequest,
+			"message": "Query is incorrect",
+		})
+	}
+
+	var jobPosts []db.JobPost
+	db.DB.Order("employee_count").
+		Limit(parsedCount).
+		Find(&jobPosts)
+
+	return c.JSON(fiber.Map{
+		"status": fiber.StatusOK,
+		"data":   jobPosts,
 	})
 }
 
@@ -698,9 +722,13 @@ func ApplyJobPost(c *fiber.Ctx) error {
 		})
 	}
 
+	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
 	var jobPost db.JobPost
 	var column db.ApplyJobPost
-	db.DB.Select("id").Where("id = ?", body.PostID).Select(&jobPost)
+
+	db.DB.Select("id").
+		Where("id = ?", body.PostID).Select(&jobPost)
 
 	if jobPost.Model.ID == 0 {
 		return c.JSON(fiber.Map{
@@ -709,9 +737,15 @@ func ApplyJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	column.JobPost = jobPost
-	column.User = db.User{Model: gorm.Model{ID: user.ID}}
-	db.DB.Create(&column)
+	go db.DB.Model(&db.JobPost{}).
+		Where("id = ?", jobPost.Model.ID).
+		Update("employee_count", "employee_count + 1")
+
+	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+
+	//column.JobPost = jobPost
+	//column.User = db.User{Model: gorm.Model{ID: user.ID}}
+	//db.DB.Create(&column)
 
 	return c.JSON(fiber.Map{
 		"status":  fiber.StatusOK,
