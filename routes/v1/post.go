@@ -140,6 +140,7 @@ func UpdateJobPost(c *fiber.Ctx) error {
 		Where("id = ?", body.Id).
 		Find(&post)
 
+	body.JobPost.UserID = post.UserID
 	body.JobPost.UpdatedAt = post.UpdatedAt
 	body.JobPost.CreatedAt = post.CreatedAt
 
