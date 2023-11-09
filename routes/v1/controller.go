@@ -33,6 +33,8 @@ func Controller(app *fiber.App) {
 	app.Use("/api/v1/post/apply_job_post", authMiddleWare)
 	app.Post("/api/v1/post/apply_job_post", ApplyJobPost)
 
+	app.Get("/api/v1/post/popular_job_post", GetPopularJobPosts)
+
 	// idk pending
 	//app.Get("/api/v1/post/apply_job_post", ApplyJobPostApprovalQueue)
 	//app.Put("/api/v1/post/apply_job_post", AcceptApplyJobPost)

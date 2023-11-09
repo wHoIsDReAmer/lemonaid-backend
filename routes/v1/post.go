@@ -725,7 +725,7 @@ func ApplyJobPost(c *fiber.Ctx) error {
 	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
 	var jobPost db.JobPost
-	var column db.ApplyJobPost
+	//var column db.ApplyJobPost
 
 	db.DB.Select("id").
 		Where("id = ?", body.PostID).Select(&jobPost)
