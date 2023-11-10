@@ -3,13 +3,18 @@ package pay
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"lemonaid-backend/db"
 	"net/url"
 	"os"
 )
 
-const (
-	PAYAPP_API_DOMAIN = "api.payapp.kr"
-	PAYAPP_API_URL    = "/oapi/apiLoad.html"
+var (
+	planMapping = map[string]string{
+		"1": "69000",
+		"2": "199000",
+		"3": "49000",
+		"4": "1000000",
+	}
 )
 
 func PayAppFeedback(c *fiber.Ctx) error {
@@ -23,9 +28,23 @@ func PayAppFeedback(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Error parsing form data")
 	}
 
-	if formValues.Get("linkval") != os.Getenv("PAYAPP_LINK_VALUE") {
-		return c.Status(fiber.StatusBadRequest).SendString("Error parsing form data")
+	if formValues.Get("pay_state") != "4" ||
+		formValues.Get("userid") != os.Getenv("PAYAPP_VERIFY_ID") || formValues.Get("linkval") != os.Getenv("PAYAPP_LINK_VALUE") {
+		return fiber.ErrNotAcceptable
 	}
+
+	value, ok := planMapping[formValues.Get("var1")]
+	if !ok || value != formValues.Get("price") {
+		return fiber.ErrBadRequest
+	}
+
+	phone, ok := planMapping[formValues.Get("recvphone")]
+	if !ok {
+		return fiber.ErrBadRequest
+	}
+
+	db.DB.Model(&db.User{}).Where("phone_number = ?", phone).
+		Update("plan = ?", formValues.Get("var1"))
 
 	return c.SendString("Success")
 }
