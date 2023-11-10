@@ -54,6 +54,18 @@ func GetPopularJobPosts(c *fiber.Ctx) error {
 }
 
 func WriteJobPost(c *fiber.Ctx) error {
+	email := c.Locals("email")
+
+	var user db.User
+	db.DB.Select("plan").Where("email = ?", email).Find(&user)
+
+	if user.Plan != db.STANDARD && user.Plan != db.PREMIUM {
+		return c.JSON(fiber.Map{
+			"status":  fiber.StatusForbidden,
+			"message": "Permission denied",
+		})
+	}
+
 	var body db.PendingJobPost
 	if err := c.BodyParser(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
