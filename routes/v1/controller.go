@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/gofiber/fiber/v2"
 	"lemonaid-backend/routes/v1/oauth"
+	"lemonaid-backend/routes/v1/pay"
 	"time"
 )
 
@@ -94,4 +95,9 @@ func Controller(app *fiber.App) {
 
 	app.Get("/api/v1/oauth/naver/login", oauth.NaverLogin)
 	app.Get("/api/v1/oauth/naver", oauth.NaverCallback)
+
+	app.Get("/api/v1/oauth/facebook/login", oauth.FacebookLogin)
+	app.Get("/api/v1/oauth/facebook", oauth.FacebookCallback)
+
+	app.Post("/api/v1/pay/payapp_feedback", pay.PayAppFeedback)
 }
