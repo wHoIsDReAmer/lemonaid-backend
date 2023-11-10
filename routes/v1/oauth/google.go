@@ -114,7 +114,7 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 
 	var user db.User
 	db.DB.
-		Select("password").
+		Select("id, password").
 		Where("email = ?", oauthInfo.Email).
 		Find(&user)
 
