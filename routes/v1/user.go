@@ -107,7 +107,7 @@ func Teachers(c *fiber.Ctx) error {
 	var users []db.User
 	db.DB.
 		Select("id, first_name, last_name, email, phone_number, birthday, gender, occupation, nationality, image").
-		Where("user_type = ? and resume is not null", "2").
+		Where("user_accepted = 1 and user_type = ? and resume is not null", "2").
 		Find(&users)
 
 	var teachers = make([]UserResponse, len(users))
