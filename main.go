@@ -24,7 +24,8 @@ func main() {
 
 	if os.Getenv("DEV") == "true" {
 		app.Use(cors.New(cors.Config{
-			ExposeHeaders: "Content-Disposition",
+			AllowCredentials: true,
+			ExposeHeaders:    "Content-Disposition",
 		}))
 	}
 
