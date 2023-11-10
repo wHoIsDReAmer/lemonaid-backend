@@ -18,6 +18,9 @@ func PayAppFeedback(c *fiber.Ctx) error {
 	// Body에서 URL 인코딩된 폼 데이터 파싱
 	body := string(c.Body())
 	formValues, err := url.ParseQuery(body)
+
+	fmt.Println(formValues.Encode())
+
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).SendString("Error parsing form data")
 	}
@@ -27,7 +30,11 @@ func PayAppFeedback(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).SendString(err.Error())
 	}
 
-	fmt.Println(response)
+	if response["state"][0] == "1" {
+		// 결제 요청 성공 처리
+	} else {
+		// 결제 요청 실패 처리
+	}
 
 	return c.SendString("Success")
 }
