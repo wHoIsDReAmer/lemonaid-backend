@@ -128,9 +128,17 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	oauthSession := c.Cookies("lsession", "")
+	oauthSession := c.Get(fiber.HeaderAuthorization, "")
+	var sess db.Session
 
-	if !emailValidation(email[0]) && oauthSession == "" {
+	if oauthSession != "" {
+		db.DB.
+			Select("email, o_authing").
+			Where("uuid = ?", oauthSession).
+			Find(&sess)
+	}
+
+	if !emailValidation(email[0]) && sess.OAuthing != 1 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
 			"message": "Email must be email form",
@@ -201,17 +209,9 @@ func Register(c *fiber.Ctx) error {
 	hasher.Write([]byte(password[0] + user.Salt))
 	user.Password = hex.EncodeToString(hasher.Sum(nil))
 
-	if oauthSession != "" {
-		var sess db.Session
-		db.DB.
-			Select("email, o_authing").
-			Where("uuid = ?", oauthSession).
-			Find(&sess)
-
-		if sess.OAuthing == 1 {
-			user.Email = sess.Email
-			user.Password = "oauth"
-		}
+	if sess.OAuthing == 1 {
+		user.Email = sess.Email
+		user.Password = "oauth"
 	}
 
 	user.PhoneNumber = phoneNumber[0]
@@ -267,7 +267,6 @@ func Register(c *fiber.Ctx) error {
 		user.VideoMessengerID = &videoMessengerId[0]
 	}
 
-	c.ClearCookie("lsession")
 	go db.DB.
 		Where("email = ?", email[0]).
 		Delete(&db.Session{})

@@ -158,14 +158,7 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 
 		db.DB.Save(sess)
 
-		cookie := new(fiber.Cookie)
-		cookie.Name = "lsession"
-		cookie.Value = _uuid.String()
-		cookie.Expires = time.Now().Add(6 * time.Hour)
-
-		c.Cookie(cookie)
-
-		return c.Redirect("/")
+		return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI"))
 	}
 
 	if user.Password != "oauth" && user.Password != "" {
@@ -183,12 +176,5 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 
 	db.DB.Save(sess)
 
-	cookie := new(fiber.Cookie)
-	cookie.Name = "lsession"
-	cookie.Value = _uuid.String()
-	cookie.Expires = time.Now().Add(6 * time.Hour)
-
-	c.Cookie(cookie)
-
-	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
+	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }
