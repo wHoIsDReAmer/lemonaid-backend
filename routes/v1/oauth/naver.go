@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	json2 "encoding/json"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"io/ioutil"
@@ -154,12 +155,13 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 		sess.Uuid = _uuid.String()
 		sess.OAuthing = 0
 		sess.UserID = user.ID
+		fmt.Println(sess.UserID)
 		sess.Email = oauthInfo.Response.Email
 		sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
 
 		db.DB.Save(sess)
 
-		return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI"))
+		return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI") + "?session=" + _uuid.String())
 	}
 
 	if user.Password != "oauth" && user.Password != "" {
