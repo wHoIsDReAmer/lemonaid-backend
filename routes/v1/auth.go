@@ -128,7 +128,9 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	if !emailValidation(email[0]) {
+	oauthSession := c.Cookies("lsession", "")
+
+	if !emailValidation(email[0]) && oauthSession == "" {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
 			"message": "Email must be email form",
@@ -199,7 +201,6 @@ func Register(c *fiber.Ctx) error {
 	hasher.Write([]byte(password[0] + user.Salt))
 	user.Password = hex.EncodeToString(hasher.Sum(nil))
 
-	oauthSession := c.Cookies("lsession", "")
 	if oauthSession != "" {
 		var sess db.Session
 		db.DB.
