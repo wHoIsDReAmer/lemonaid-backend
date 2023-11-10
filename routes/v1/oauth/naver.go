@@ -152,6 +152,7 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 		db.DB.Where("email = ?", oauthInfo.Response.Email).FirstOrInit(sess)
 
 		sess.Uuid = _uuid.String()
+		sess.OAuthing = 0
 		sess.UserID = user.ID
 		sess.Email = oauthInfo.Response.Email
 		sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)

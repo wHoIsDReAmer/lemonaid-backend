@@ -126,6 +126,7 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 		db.DB.Where("email = ?", oauthInfo.Email).FirstOrInit(sess)
 
 		sess.Uuid = _uuid.String()
+		sess.OAuthing = 0
 		sess.UserID = user.ID
 		sess.Email = oauthInfo.Email
 		sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
