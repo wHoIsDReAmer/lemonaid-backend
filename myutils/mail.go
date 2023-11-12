@@ -2,7 +2,6 @@ package myutils
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"mime/multipart"
 	"net/smtp"
@@ -89,8 +88,8 @@ func SendMailWithFile(to string, title string, content string, file []byte, file
 		"Content-Disposition": []string{fmt.Sprintf(`attachment; filename="%s"`, filename)},
 	})
 
-	encodedFile := base64.StdEncoding.EncodeToString(file)
-	part.Write([]byte(encodedFile))
+	//encodedFile := base64.StdEncoding.EncodeToString(file)
+	part.Write(file)
 
 	writer.Close()
 
