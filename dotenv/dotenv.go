@@ -23,7 +23,7 @@ func Load(name string) error {
 			continue
 		}
 
-		os.Setenv(splits[0], splits[1])
+		os.Setenv(splits[0], strings.Join(splits[1:], "="))
 	}
 
 	fmt.Println("Load all environment in the file")
