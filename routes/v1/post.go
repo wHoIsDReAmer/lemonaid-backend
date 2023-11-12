@@ -757,10 +757,10 @@ func ApplyJobPost(c *fiber.Ctx) error {
 		})
 	}
 
-	var user db.User
+	var posted_by db.User
 	db.DB.Select("email, phone_number").
 		Where("id = ?", jobPost.UserID).
-		Find(&user)
+		Find(&posted_by)
 
 	var applicant db.User
 	db.DB.Select("first_name, last_name, resume, resume_ext")
@@ -773,7 +773,7 @@ We are writing to confirm that we have received your application for the teachin
 
 Our review committee is diligently reviewing all applications, and we aim to complete this process within few days. You will be notified once our review is complete.
 
-Should we require further information or have any questions regarding your application, we will contact you directly. In the meantime, if you have any queries or need additional information, please feel free to reach out to us at `+user.PhoneNumber+` or `+user.Email+`.
+Should we require further information or have any questions regarding your application, we will contact you directly. In the meantime, if you have any queries or need additional information, please feel free to reach out to us at `+posted_by.PhoneNumber+` or `+posted_by.Email+`.
 
 Thank you for considering `+jobPost.Academy+` as your next opportunity. We look forward to the possibility of working together.
 
@@ -781,7 +781,7 @@ Best regards,
 
 The `+jobPost.Academy+` Team
 `)
-	go myutils.SendMailWithFile(user.Email, "새로운 교사 지원서 접수 - "+applicant.LastName+" "+applicant.FirstName, `
+	go myutils.SendMailWithFile(posted_by.Email, "새로운 교사 지원서 접수 - "+applicant.LastName+" "+applicant.FirstName, `
 안녕하세요,
 
 교사 지원서가 접수되었습니다.
@@ -793,7 +793,7 @@ The `+jobPost.Academy+` Team
 		Update("employee_count", "employee_count + 1")
 
 	//column.JobPost = jobPost
-	//column.User = db.User{Model: gorm.Model{ID: user.ID}}
+	//column.User = db.User{Model: gorm.Model{ID: posted_by.ID}}
 	//db.DB.Create(&column)
 
 	return c.JSON(fiber.Map{
