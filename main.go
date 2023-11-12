@@ -6,12 +6,17 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"lemonaid-backend/db"
 	"lemonaid-backend/dotenv"
+	"lemonaid-backend/myutils"
 	v1 "lemonaid-backend/routes/v1"
 	"os"
 )
 
 func main() {
 	dotenv.Load(".env")
+
+	// Test Content
+	myutils.SendMailWithFile("lcw060403@gmail.com", "Hello Chanwook!",
+		"This is content", []byte("some byte file.."), "test.txt")
 
 	var port = os.Getenv("PORT")
 
