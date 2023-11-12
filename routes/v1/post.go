@@ -737,19 +737,17 @@ func ApplyJobPost(c *fiber.Ctx) error {
 	var user db.User
 	db.DB.Select("plan, id").Where("email = ?", email).Find(&user)
 
-	if user.Plan != db.STANDARD || user.Plan != db.PREMIUM {
+	if user.Plan != db.STANDARD && user.Plan != db.PREMIUM {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusForbidden,
 			"message": "Permission denied",
 		})
 	}
 
-	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-
 	var jobPost db.JobPost
 	//var column db.ApplyJobPost
 
-	db.DB.Select("id").
+	db.DB.Select("id, user_id").
 		Where("id = ?", body.PostID).Select(&jobPost)
 
 	if jobPost.Model.ID == 0 {
@@ -759,11 +757,40 @@ func ApplyJobPost(c *fiber.Ctx) error {
 		})
 	}
 
+	var user db.User
+	db.DB.Select("email, phone_number").
+		Where("id = ?", jobPost.UserID).
+		Find(&user)
+
+	var applicant db.User
+	db.DB.Select("first_name, last_name, resume, resume_ext")
+
+	go myutils.SendMail(email.(string), "New Teacher Application Submission for "+
+		jobPost.Academy, `
+Dear `+applicant.LastName+` `+applicant.FirstName+`,
+
+We are writing to confirm that we have received your application for the teaching position at `+jobPost.Academy+`. Your interest in joining our team is greatly appreciated.
+
+Our review committee is diligently reviewing all applications, and we aim to complete this process within few days. You will be notified once our review is complete.
+
+Should we require further information or have any questions regarding your application, we will contact you directly. In the meantime, if you have any queries or need additional information, please feel free to reach out to us at `+user.PhoneNumber+` or `+user.Email+`.
+
+Thank you for considering `+jobPost.Academy+` as your next opportunity. We look forward to the possibility of working together.
+
+Best regards,
+
+The `+jobPost.Academy+` Team
+`)
+	go myutils.SendMailWithFile(user.Email, "새로운 교사 지원서 접수 - "+applicant.LastName+" "+applicant.FirstName, `
+안녕하세요,
+
+교사 지원서가 접수되었습니다.
+이력서는 파일에 있으며, 열람하실 수 있습니다.
+`, *applicant.Resume, strings.ReplaceAll(uuid.NewString(), "-", "-")+applicant.ResumeExt)
+
 	go db.DB.Model(&db.JobPost{}).
 		Where("id = ?", jobPost.Model.ID).
 		Update("employee_count", "employee_count + 1")
-
-	// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 
 	//column.JobPost = jobPost
 	//column.User = db.User{Model: gorm.Model{ID: user.ID}}
