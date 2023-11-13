@@ -20,7 +20,7 @@ func SendMailPasscode(to string, title string, content string, passcode string) 
 	<html>
 	<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 50px; text-align: center;">
 		<div style="max-width: 500px; margin: auto; background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-			<img src="https://your-logo-url.com/logo.png" alt="Lemonaid Logo" style="width: 150px; margin-bottom: 20px;"/>
+			<img src="/logo.png" alt="Lemonaid Logo" style="width: 150px; margin-bottom: 20px;"/>
 			<h1 style="color: #333;">` + title + `</h1>
 			<p style="color: #555;">` + content + `</p>
 			<div style="background-color: #f0f0f0; margin: 20px 0; padding: 20px; border-radius: 5px;">
@@ -56,7 +56,7 @@ func SendMail(to string, title string, content string) {
 	<html>
 	<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 50px; text-align: center;">
 		<div style="max-width: 500px; margin: auto; background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-			<img src="https://your-logo-url.com/logo.png" alt="Lemonaid Logo" style="width: 150px; margin-bottom: 20px;"/>
+			<img src="/logo.png" alt="Lemonaid Logo" style="width: 150px; margin-bottom: 20px;"/>
 			<h1 style="color: #333;">` + title + `</h1>
 			<p style="color: #555;">` + content + `</p>
 			<p style="color: #555;">Thank you for choosing Lemonaid!</p>
@@ -88,7 +88,7 @@ func SendMailWithFile(to string, title string, content string, file []byte, file
 	<html>
 	<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 50px; text-align: center;">
 		<div style="max-width: 500px; margin: auto; background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-			<img src="https://your-logo-url.com/logo.png" alt="Lemonaid Logo" style="width: 150px; margin-bottom: 20px;"/>
+			<img src="/logo.png" alt="Lemonaid Logo" style="width: 150px; margin-bottom: 20px;"/>
 			<h1 style="color: #333;">` + title + `</h1>
 			<p style="color: #555;">` + content + `</p>
 			<p style="color: #555;">Thank you for choosing Lemonaid!</p>
