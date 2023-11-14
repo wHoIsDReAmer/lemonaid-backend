@@ -12,7 +12,6 @@ import (
 	"lemonaid-backend/db"
 	"net/http"
 	"os"
-	"time"
 )
 
 var (
@@ -121,17 +120,7 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 
 	if user.Password == "oauth" {
 		_uuid := uuid.New()
-
-		// add session
-		sess := new(db.Session)
-		db.DB.Where("email = ?", oauthInfo.Email).FirstOrInit(sess)
-
-		sess.Uuid = _uuid.String()
-		sess.OAuthing = 0
-		sess.UserID = user.ID
-		sess.Email = oauthInfo.Email
-		sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
-		db.DB.Save(sess)
+		CreateOAuthSession(_uuid.String(), oauthInfo.Email, 0, user.ID)
 
 		return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI") + "?session=" + _uuid.String())
 	}
@@ -140,15 +129,8 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 		return c.Send([]byte("You already have account has same email"))
 	}
 
-	sess := new(db.Session)
-	db.DB.Where("email = ?", oauthInfo.Email).FirstOrInit(sess)
-
 	_uuid := uuid.New()
-	sess.Uuid = _uuid.String()
-	sess.OAuthing = 1
-	sess.Email = oauthInfo.Email
-	sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
-	db.DB.Save(sess)
+	CreateOAuthSession(_uuid.String(), oauthInfo.Email, 0, user.ID)
 
 	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }

@@ -10,7 +10,6 @@ import (
 	"lemonaid-backend/db"
 	"net/http"
 	"os"
-	"time"
 )
 
 func NaverLogin(c *fiber.Ctx) error {
@@ -146,18 +145,7 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 
 	if user.Password == "oauth" {
 		_uuid := uuid.New()
-
-		// add session
-		sess := new(db.Session)
-		db.DB.Where("email = ?", oauthInfo.Response.Email).FirstOrInit(sess)
-
-		sess.Uuid = _uuid.String()
-		sess.OAuthing = 0
-		sess.UserID = user.ID
-		sess.Email = oauthInfo.Response.Email
-		sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
-
-		db.DB.Save(sess)
+		CreateOAuthSession(_uuid.String(), oauthInfo.Response.Email, 0, user.ID)
 
 		return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI") + "?session=" + _uuid.String())
 	}
@@ -166,16 +154,8 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 		return c.Send([]byte("You already have account has same email"))
 	}
 
-	sess := new(db.Session)
-	db.DB.Where("email = ?", oauthInfo.Response.Email).FirstOrInit(sess)
 	_uuid := uuid.New()
-
-	sess.Uuid = _uuid.String()
-	sess.OAuthing = 1
-	sess.Email = oauthInfo.Response.Email
-	sess.Expires = time.Now().Add(time.Duration(6) * time.Hour)
-
-	db.DB.Save(sess)
+	CreateOAuthSession(_uuid.String(), oauthInfo.Response.Email, 0, user.ID)
 
 	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }
