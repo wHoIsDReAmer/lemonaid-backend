@@ -155,7 +155,7 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 	}
 
 	_uuid := uuid.New()
-	CreateOAuthSession(_uuid.String(), oauthInfo.Response.Email, 0, user.ID)
+	CreateOAuthSession(_uuid.String(), oauthInfo.Response.Email, 1, user.ID)
 
 	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }

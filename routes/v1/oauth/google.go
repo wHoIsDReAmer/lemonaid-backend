@@ -130,7 +130,7 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 	}
 
 	_uuid := uuid.New()
-	CreateOAuthSession(_uuid.String(), oauthInfo.Email, 0, user.ID)
+	CreateOAuthSession(_uuid.String(), oauthInfo.Email, 1, user.ID)
 
 	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }
