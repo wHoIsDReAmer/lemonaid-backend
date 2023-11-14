@@ -138,8 +138,6 @@ func Register(c *fiber.Ctx) error {
 			Find(&sess)
 	}
 
-	fmt.Printf("OAuthing: %d", sess.OAuthing)
-
 	if !emailValidation(email[0]) && sess.OAuthing != 1 {
 		return c.JSON(fiber.Map{
 			"status":  fiber.StatusBadRequest,
