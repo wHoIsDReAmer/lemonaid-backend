@@ -91,7 +91,7 @@ func KakaoCallback(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	userReq, err := http.NewRequest("GET", "https://kapi.kakao.com/v2/user/me")
+	userReq, err := http.NewRequest("GET", "https://kapi.kakao.com/v2/user/me", nil)
 	userReq.Header.Add("Authorization", tokenInfo.TokenType+" "+tokenInfo.AccessToken)
 
 	res, err = client.Do(userReq)
