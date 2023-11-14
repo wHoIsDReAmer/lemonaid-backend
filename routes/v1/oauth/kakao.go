@@ -6,7 +6,9 @@ import (
 	json2 "encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"io"
+	"lemonaid-backend/db"
 	"net/http"
 	"net/url"
 	"os"
@@ -47,7 +49,7 @@ type KakaoToken struct {
 }
 
 type KakaoOAuthInfo struct {
-	KakaoAccount
+	KakaoAccount KakaoAccount `json:"kakao_account"`
 }
 
 type KakaoAccount struct {
@@ -116,33 +118,34 @@ func KakaoCallback(c *fiber.Ctx) error {
 
 	var oauthInfo KakaoOAuthInfo
 	err = json2.Unmarshal(body, &oauthInfo)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
 
-	return c.JSON(oauthInfo)
+	if !oauthInfo.KakaoAccount.HasEmail || !oauthInfo.KakaoAccount.IsEmailValid {
+		return c.Status(fiber.StatusBadRequest).
+			SendString("You don't have email to proceed or not valid email ")
+	}
 
-	//if !oauthInfo.HasEmail || !oauthInfo.IsEmailValid {
-	//	return c.Status(fiber.StatusBadRequest).
-	//		SendString("You don't have email to proceed or not valid email ")
-	//}
-	//
-	//var user db.User
-	//db.DB.
-	//	Select("id, password").
-	//	Where("email = ?", oauthInfo.Email).
-	//	Find(&user)
-	//
-	//if user.Password == "oauth" {
-	//	_uuid := uuid.New()
-	//	CreateOAuthSession(_uuid.String(), oauthInfo.Email, 0, user.ID)
-	//
-	//	return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI") + "?session=" + _uuid.String())
-	//}
-	//
-	//if user.Password != "oauth" && user.Password != "" {
-	//	return c.Send([]byte("You already have account has same email"))
-	//}
-	//
-	//_uuid := uuid.New()
-	//CreateOAuthSession(_uuid.String(), oauthInfo.Email, 0, user.ID)
-	//
-	//return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
+	var user db.User
+	db.DB.
+		Select("id, password").
+		Where("email = ?", oauthInfo.KakaoAccount.Email).
+		Find(&user)
+
+	if user.Password == "oauth" {
+		_uuid := uuid.New()
+		CreateOAuthSession(_uuid.String(), oauthInfo.KakaoAccount.Email, 0, user.ID)
+
+		return c.Redirect(os.Getenv("OAUTH_GLOBAL_LOGIN_REDIRECT_URI") + "?session=" + _uuid.String())
+	}
+
+	if user.Password != "oauth" && user.Password != "" {
+		return c.Send([]byte("You already have account has same email"))
+	}
+
+	_uuid := uuid.New()
+	CreateOAuthSession(_uuid.String(), oauthInfo.KakaoAccount.Email, 0, user.ID)
+
+	return c.Redirect(os.Getenv("OAUTH_GLOBAL_REGISTER_REDIRECT_URI") + "?oauth=true&session=" + _uuid.String())
 }
