@@ -6,7 +6,7 @@ import (
 	json2 "encoding/json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"io/ioutil"
+	"io"
 	"lemonaid-backend/db"
 	"net/http"
 	"os"
@@ -59,6 +59,7 @@ type InnerResponse struct {
 
 func NaverCallback(c *fiber.Ctx) error {
 	sess := store.Get(c)
+	defer sess.Destroy()
 
 	state := c.Query("state")
 
@@ -92,7 +93,7 @@ func NaverCallback(c *fiber.Ctx) error {
 		})
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -106,7 +107,6 @@ func NaverCallback(c *fiber.Ctx) error {
 	if err != nil {
 		return fiber.ErrInternalServerError
 	}
-
 	return NaverAuthProcessing(c, data)
 }
 
@@ -125,7 +125,7 @@ func NaverAuthProcessing(c *fiber.Ctx, data NaverToken) error {
 		return fiber.ErrInternalServerError
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
 		return fiber.ErrInternalServerError

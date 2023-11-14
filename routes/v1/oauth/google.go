@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"io/ioutil"
+	"io"
 	"lemonaid-backend/db"
 	"net/http"
 	"os"
@@ -52,6 +52,7 @@ func GoogleLogin(c *fiber.Ctx) error {
 
 func GoogleCallback(c *fiber.Ctx) error {
 	sess := store.Get(c)
+	defer sess.Destroy()
 
 	state := c.Query("state")
 	if sess.Get("state") != state {
@@ -94,7 +95,7 @@ func GoAuthProcessing(c *fiber.Ctx, token *oauth2.Token) error {
 		return err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

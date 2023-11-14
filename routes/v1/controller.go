@@ -96,6 +96,9 @@ func Controller(app *fiber.App) {
 	app.Get("/api/v1/oauth/naver/login", oauth.NaverLogin)
 	app.Get("/api/v1/oauth/naver", oauth.NaverCallback)
 
+	app.Get("/api/v1/oauth/kakao/login", oauth.KakaoLogin)
+	app.Get("/api/v1/oauth/kakao", oauth.KakaoCallback)
+
 	app.Get("/api/v1/oauth/facebook/login", oauth.FacebookLogin)
 	app.Get("/api/v1/oauth/facebook", oauth.FacebookCallback)
 
