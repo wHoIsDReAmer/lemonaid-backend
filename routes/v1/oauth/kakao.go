@@ -72,7 +72,6 @@ func KakaoCallback(c *fiber.Ctx) error {
 
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	// https://kapi.kakao.com/v2/user/me
 	client := http.Client{}
 
 	res, err := client.Do(req)
@@ -92,5 +91,18 @@ func KakaoCallback(c *fiber.Ctx) error {
 		return fiber.ErrInternalServerError
 	}
 
-	return c.JSON(tokenInfo)
+	userReq, err := http.NewRequest("GET", "https://kapi.kakao.com/v2/user/me")
+	userReq.Header.Add("Authorization", tokenInfo.TokenType+" "+tokenInfo.AccessToken)
+
+	res, err = client.Do(userReq)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	body, err = io.ReadAll(res.Body)
+	if err != nil {
+		return fiber.ErrInternalServerError
+	}
+
+	return c.SendString(string(body))
 }
