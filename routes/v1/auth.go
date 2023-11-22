@@ -364,7 +364,8 @@ func DenyUser(c *fiber.Ctx) error {
 			})
 	}
 
-	result := db.DB.Unscoped().Model(&db.User{}).Where("email in (?)").
+	result := db.DB.Unscoped().
+		Where("email in (?)").
 		Delete(&db.User{})
 
 	if result.RowsAffected == 0 {
